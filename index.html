@@ -51,13 +51,14 @@
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
         <div>
           <h2 class="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2"><i class="fas fa-file-import text-rose-500"></i> 匯入問卷資料</h2>
-          <p class="text-xs text-gray-500 mb-4">支援 CSV、Excel 複製貼上，或空格/逗點分隔文字。</p>
+          <p class="text-xs text-gray-500 mb-4">支援單欄（如僅 Email/姓名）或多欄資料貼上。</p>
           <button onclick="loadSampleData()" class="w-full mb-3 py-2 px-4 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-xl font-bold border border-amber-200 text-sm flex items-center justify-center gap-2 transition-all">
             <i class="fas fa-bolt"></i> 載入 50 筆測試資料
           </button>
-          <textarea id="csv-input" placeholder="貼上文字，格式如：
-王曉明 AA@123.com 123045
-陳小美, BB@456.com, 546123" class="w-full h-32 p-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none mb-3"></textarea>
+          <textarea id="csv-input" placeholder="貼上文字，可為單欄或多欄：
+AA@123.com
+BB@456.com
+王曉明 AA@123.com 123045" class="w-full h-32 p-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none mb-3"></textarea>
           <button onclick="importCSVText()" class="w-full py-2.5 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 transition-all shadow-sm">匯入文字資料</button>
         </div>
         
@@ -76,7 +77,7 @@
         <div class="overflow-x-auto max-h-80">
           <table class="w-full text-left text-xs">
             <thead class="bg-gray-50 text-gray-700 font-bold sticky top-0">
-              <tr><th class="p-2">#</th><th class="p-2">姓名</th><th class="p-2">Email</th><th class="p-2">電話</th></tr>
+              <tr><th class="p-2">#</th><th class="p-2">姓名 / 主要資料</th><th class="p-2">Email</th><th class="p-2">電話</th></tr>
             </thead>
             <tbody id="participant-table-body" class="divide-y divide-gray-100">
               <tr><td colspan="4" class="text-center py-8 text-gray-400 font-medium">等待資料匯入...</td></tr>
@@ -170,7 +171,7 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead class="bg-gray-50 text-gray-700 font-bold">
-            <tr><th class="p-3">獎項</th><th class="p-3">中獎者姓名</th><th class="p-3">Email</th><th class="p-3">電話</th><th class="p-3">抽籤時間</th></tr>
+            <tr><th class="p-3">獎項</th><th class="p-3">中獎者資料 / 姓名</th><th class="p-3">Email</th><th class="p-3">電話</th><th class="p-3">抽籤時間</th></tr>
           </thead>
           <tbody id="winners-table-body" class="divide-y divide-gray-100">
             <tr><td colspan="5" class="text-center py-8 text-gray-400 font-medium">尚無中獎紀錄</td></tr>
@@ -295,8 +296,8 @@
           animInterval = setInterval(() => {
             const randomP = participants[Math.floor(Math.random() * participants.length)];
             if (randomP) {
-              winnerNameEl.innerText = randomP.name || '抽籤中';
-              winnerInfoEl.innerText = `Email: ${randomP.email}`;
+              winnerNameEl.innerText = randomP.name || randomP.email || randomP.phone || '抽籤中';
+              winnerInfoEl.innerText = randomP.email ? `Email: ${randomP.email}` : (randomP.phone ? `電話: ${randomP.phone}` : '');
             }
           }, 80);
         }
@@ -311,8 +312,13 @@
 
           if (state.winners.length === 1) {
             const w = state.winners[0];
-            winnerNameEl.innerText = w.name || '未提供姓名';
-            winnerInfoEl.innerText = `Email: ${w.email} | 電話: ${w.phone || '無'}`;
+            winnerNameEl.innerText = w.name || w.email || w.phone || '無名氏';
+            
+            // 彈性顯示次要資訊
+            const infoParts = [];
+            if (w.email && w.name !== w.email) infoParts.push(`Email: ${w.email}`);
+            if (w.phone && w.name !== w.phone) infoParts.push(`電話: ${w.phone}`);
+            winnerInfoEl.innerText = infoParts.join(" | ") || "幸運中獎者！";
           } else {
             winnerNameEl.innerText = `共抽出 ${state.winners.length} 位中獎者`;
             winnerInfoEl.innerText = `請至「中獎紀錄」分頁查看完整名單`;
@@ -337,8 +343,9 @@
       const remain = prize.count - existingWinnersCount;
       if (remain <= 0) { alert("該獎項已全部抽出！"); return; }
 
-      const winnerEmails = new Set(winners.map(w => w.email));
-      const pool = participants.filter(p => !winnerEmails.has(p.email));
+      // 檢查唯一標記 (以 key 為準，沒有 key 則取可用欄位)
+      const winnerKeys = new Set(winners.map(w => w.key || w.email || w.name || w.phone));
+      const pool = participants.filter(p => !winnerKeys.has(p.key || p.email || p.name || p.phone));
       if (pool.length === 0) { alert("合格抽獎池中已無可抽人員！"); return; }
 
       const countToDraw = countType === 'all' ? Math.min(remain, pool.length) : 1;
@@ -360,8 +367,9 @@
           batch.set(newDocRef, {
             prizeId: prize.id,
             prizeName: prize.name,
-            name: winnerP.name || '未提供姓名',
-            email: winnerP.email,
+            key: winnerP.key || winnerP.name || winnerP.email || winnerP.phone,
+            name: winnerP.name || '',
+            email: winnerP.email || '',
             phone: winnerP.phone || '',
             timestamp: nowStr
           });
@@ -378,8 +386,8 @@
     };
 
     function updateHeaderCounts() {
-      const winnerEmails = new Set(winners.map(w => w.email));
-      const validPoolCount = participants.filter(p => !winnerEmails.has(p.email)).length;
+      const winnerKeys = new Set(winners.map(w => w.key || w.email || w.name || w.phone));
+      const validPoolCount = participants.filter(p => !winnerKeys.has(p.key || p.email || p.name || p.phone)).length;
       document.getElementById("pool-count").innerText = validPoolCount;
       document.getElementById("winner-count").innerText = winners.length;
     }
@@ -393,9 +401,9 @@
       tbody.innerHTML = participants.slice(0, 100).map((p, idx) => `
         <tr class="hover:bg-gray-50">
           <td class="p-2 text-gray-400 font-bold">${idx + 1}</td>
-          <td class="p-2 font-bold">${escapeHtml(p.name || '未提供姓名')}</td>
-          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.email)}</td>
-          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.phone || '無')}</td>
+          <td class="p-2 font-bold">${escapeHtml(p.name || p.email || p.phone || '無資料')}</td>
+          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.email || '-')}</td>
+          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.phone || '-')}</td>
         </tr>
       `).join('');
     }
@@ -445,8 +453,8 @@
       tbody.innerHTML = winners.map(w => `
         <tr class="hover:bg-amber-50/50">
           <td class="p-3 font-bold text-rose-600">${escapeHtml(w.prizeName)}</td>
-          <td class="p-3 font-bold text-gray-800">${escapeHtml(w.name)}</td>
-          <td class="p-3 text-gray-600 font-medium">${escapeHtml(w.email)}</td>
+          <td class="p-3 font-bold text-gray-800">${escapeHtml(w.name || w.email || w.phone || '無資料')}</td>
+          <td class="p-3 text-gray-600 font-medium">${escapeHtml(w.email || '-')}</td>
           <td class="p-3 text-gray-600 font-medium">${escapeHtml(w.phone || '-')}</td>
           <td class="p-3 text-gray-400 text-xs font-medium">${w.timestamp}</td>
         </tr>
@@ -461,7 +469,8 @@
       const samples = Array.from({ length: 50 }, (_, i) => ({
         name: `測試使用者 ${i + 1}`,
         email: `user${i + 1}@example.com`,
-        phone: `0912345${(i + 1).toString().padStart(3, '0')}`
+        phone: `0912345${(i + 1).toString().padStart(3, '0')}`,
+        key: `user${i + 1}@example.com`
       }));
       const batch = writeBatch(db);
       samples.forEach(s => {
@@ -471,7 +480,7 @@
       await batch.commit();
     };
 
-    // 🛠️ 支援 逗號、Tab、空格切分 (全面相容各種貼上格式)
+    // 🛠️ 支援 1 欄、2 欄、3 欄 彈性解析匯入
     window.importCSVText = async function() {
       const text = document.getElementById("csv-input").value.trim();
       if (!text) return alert("請輸入文字內容");
@@ -484,20 +493,45 @@
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        // 優先使用逗號、Tab 或 2個以上連續空格切分
+        // 切分欄位：逗號、Tab 或 2個以上連續空格
         let parts = trimmedLine.split(/[\t,]+|\s{2,}/).map(s => s.trim()).filter(Boolean);
 
-        // 若依然只有一段，改嘗試單一空格切分
+        // 若依然只有一段，再試單空格切分
         if (parts.length === 1) {
           parts = trimmedLine.split(/\s+/).map(s => s.trim()).filter(Boolean);
         }
 
-        if (parts.length >= 2) {
+        if (parts.length >= 1) {
+          let name = '', email = '', phone = '';
+
+          if (parts.length === 1) {
+            const val = parts[0];
+            if (val.includes('@')) {
+              email = val;
+            } else if (/^09\d{8}$/.test(val) \vert{}\vert{} /^\d+$/.test(val)) {
+              phone = val;
+            } else {
+              name = val;
+            }
+          } else if (parts.length === 2) {
+            name = parts[0];
+            if (parts[1].includes('@')) {
+              email = parts[1];
+            } else {
+              phone = parts[1];
+            }
+          } else {
+            name = parts[0];
+            email = parts[1];
+            phone = parts[2];
+          }
+
           const ref = doc(collection(db, "participants"));
           batch.set(ref, {
-            name: parts[0] || '未提供姓名',
-            email: parts[1] || '',
-            phone: parts[2] || ''
+            name: name,
+            email: email,
+            phone: phone,
+            key: email || name || phone || trimmedLine
           });
           count++;
         }
@@ -508,11 +542,11 @@
         document.getElementById("csv-input").value = "";
         alert(`已成功匯入 ${count} 筆資料！`);
       } else {
-        alert("未能解析出有效的資料，請確認格式（姓名 Email 電話）");
+        alert("未能解析出有效的資料，請確認輸入內容！");
       }
     };
 
-    // 🛠️ 通用獨立清除函式 (支援分別清除：participants, prizes, winners)
+    // 清除指定 Collection
     window.clearCollectionData = async function(targetCollection) {
       const nameMap = {
         'participants': '參加者名單',
@@ -555,9 +589,10 @@
 
     window.exportWinners = function() {
       if (winners.length === 0) return alert("無中獎紀錄可匯出");
-      let csv = "\uFEFF獎項,姓名,Email,電話,抽籤時間\n";
+      let csv = "\uFEFF獎項,姓名/主要資料,Email,電話,抽籤時間\n";
       winners.forEach(w => {
-        csv += `"${w.prizeName}","${w.name}","${w.email}","${w.phone}","${w.timestamp}"\n`;
+        const displayName = w.name || w.email || w.phone || '';
+        csv += `"${w.prizeName}","${displayName}","${w.email}","${w.phone}","${w.timestamp}"\n`;
       });
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
