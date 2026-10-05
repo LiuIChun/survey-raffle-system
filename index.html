@@ -479,16 +479,18 @@
       getDocs
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'lottery-system-app';
+    const appId = 'survey-raffle-system';
+
+    // ⚠️ 請將下方的 apiKey 替換為您從 Firebase 專案設定中取得的真實 API Key (例如 "AIzaSy...")
     const firebaseConfig = typeof __firebase_config !== 'undefined'
       ? JSON.parse(__firebase_config)
       : {
-          apiKey: "demo-api-key",
-          authDomain: "demo-app.firebaseapp.com",
-          projectId: "demo-app-id",
-          storageBucket: "demo-app.appspot.com",
-          messagingSenderId: "123456789",
-          appId: "1:123456789:web:demo"
+          apiKey: "AIzaSyAeR79pFgwTfyPjPZOgAuRetxgcJ22cago", 
+          authDomain: "survey-raffle-system.firebaseapp.com",
+          projectId: "survey-raffle-system",
+          storageBucket: "survey-raffle-system.appspot.com",
+          messagingSenderId: "1590171246481",
+          appId: "1:1590171246481:web:42ea2582b49d2efb7c1430"
         };
 
     const app = initializeApp(firebaseConfig);
@@ -497,7 +499,7 @@
 
     let currentUser = null;
 
-    // Strict Cloud Collection Paths aligned with Rule 1
+    // Strict Cloud Collection Paths
     const participantsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
     const prizesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'prizes');
     const winnersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'winners');
@@ -527,7 +529,7 @@
 
         if (statusBadge && statusText) {
           statusBadge.className = "flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 font-medium";
-          statusText.innerText = "🟢 多人同步中";
+          statusText.innerText = "🟢 雲端同步中";
         }
 
         setupParticipantsListener();
