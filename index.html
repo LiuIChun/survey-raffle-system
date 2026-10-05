@@ -10,6 +10,7 @@
   <style>
     .gradient-bg { background: linear-gradient(135deg, #fff5f5 0%, #fff0f5 100%); }
     .stage-bg { background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); }
+    button, select, option, h1, h2, h3, th { font-weight: 700; }
   </style>
 </head>
 <body class="gradient-bg min-h-screen font-sans text-gray-800 pb-12">
@@ -296,8 +297,8 @@ BB@456.com
           animInterval = setInterval(() => {
             const randomP = participants[Math.floor(Math.random() * participants.length)];
             if (randomP) {
-              winnerNameEl.innerText = randomP.name || randomP.email || randomP.phone || '抽籤中';
-              winnerInfoEl.innerText = randomP.email ? `Email: ${randomP.email}` : (randomP.phone ? `電話: ${randomP.phone}` : '');
+              winnerNameEl.innerText = getPrimaryValue(randomP, '抽籤中');
+              winnerInfoEl.innerText = getSecondaryInfo(randomP);
             }
           }, 80);
         }
@@ -312,13 +313,8 @@ BB@456.com
 
           if (state.winners.length === 1) {
             const w = state.winners[0];
-            winnerNameEl.innerText = w.name || w.email || w.phone || '無名氏';
-            
-            // 彈性顯示次要資訊
-            const infoParts = [];
-            if (w.email && w.name !== w.email) infoParts.push(`Email: ${w.email}`);
-            if (w.phone && w.name !== w.phone) infoParts.push(`電話: ${w.phone}`);
-            winnerInfoEl.innerText = infoParts.join(" | ") || "幸運中獎者！";
+            winnerNameEl.innerText = getPrimaryValue(w, '無名氏');
+            winnerInfoEl.innerText = getSecondaryInfo(w) || '幸運中獎者！';
           } else {
             winnerNameEl.innerText = `共抽出 ${state.winners.length} 位中獎者`;
             winnerInfoEl.innerText = `請至「中獎紀錄」分頁查看完整名單`;
@@ -392,6 +388,22 @@ BB@456.com
       document.getElementById("winner-count").innerText = winners.length;
     }
 
+    function getPrimaryValue(person, fallback = '無資料') {
+      return person.name || person.email || person.phone || fallback;
+    }
+
+    function getSecondaryInfo(person) {
+      const primary = getPrimaryValue(person, '');
+      const infoParts = [];
+      if (person.email && person.email !== primary) infoParts.push(`Email: ${person.email}`);
+      if (person.phone && person.phone !== primary) infoParts.push(`電話: ${person.phone}`);
+      return infoParts.join(' | ');
+    }
+
+    function getSecondaryValue(value, person) {
+      return value && value !== getPrimaryValue(person, '') ? value : '-';
+    }
+
     function renderParticipants() {
       const tbody = document.getElementById("participant-table-body");
       if (participants.length === 0) {
@@ -401,9 +413,9 @@ BB@456.com
       tbody.innerHTML = participants.slice(0, 100).map((p, idx) => `
         <tr class="hover:bg-gray-50">
           <td class="p-2 text-gray-400 font-bold">${idx + 1}</td>
-          <td class="p-2 font-bold">${escapeHtml(p.name || p.email || p.phone || '無資料')}</td>
-          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.email || '-')}</td>
-          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.phone || '-')}</td>
+          <td class="p-2 font-bold">${escapeHtml(getPrimaryValue(p))}</td>
+          <td class="p-2 text-gray-600 font-medium">${escapeHtml(getSecondaryValue(p.email, p))}</td>
+          <td class="p-2 text-gray-600 font-medium">${escapeHtml(getSecondaryValue(p.phone, p))}</td>
         </tr>
       `).join('');
     }
@@ -453,9 +465,9 @@ BB@456.com
       tbody.innerHTML = winners.map(w => `
         <tr class="hover:bg-amber-50/50">
           <td class="p-3 font-bold text-rose-600">${escapeHtml(w.prizeName)}</td>
-          <td class="p-3 font-bold text-gray-800">${escapeHtml(w.name || w.email || w.phone || '無資料')}</td>
-          <td class="p-3 text-gray-600 font-medium">${escapeHtml(w.email || '-')}</td>
-          <td class="p-3 text-gray-600 font-medium">${escapeHtml(w.phone || '-')}</td>
+          <td class="p-3 font-bold text-gray-800">${escapeHtml(getPrimaryValue(w))}</td>
+          <td class="p-3 text-gray-600 font-medium">${escapeHtml(getSecondaryValue(w.email, w))}</td>
+          <td class="p-3 text-gray-600 font-medium">${escapeHtml(getSecondaryValue(w.phone, w))}</td>
           <td class="p-3 text-gray-400 text-xs font-medium">${w.timestamp}</td>
         </tr>
       `).join('');
@@ -506,13 +518,7 @@ BB@456.com
 
           if (parts.length === 1) {
             const val = parts[0];
-            if (val.includes('@')) {
-              email = val;
-            } else if (/^09\d{8}$/.test(val) \vert{}\vert{} /^\d+$/.test(val)) {
-              phone = val;
-            } else {
-              name = val;
-            }
+            name = val;
           } else if (parts.length === 2) {
             name = parts[0];
             if (parts[1].includes('@')) {
