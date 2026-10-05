@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>問卷抽獎系統 Realtime Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .gradient-bg { background: linear-gradient(135deg, #fff5f5 0%, #fff0f5 100%); }
+    .stage-bg { background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen font-sans text-gray-800 pb-12">
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur border-b border-rose-100 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="p-2 bg-rose-500 text-white rounded-lg"><i class="fas fa-gift text-xl"></i></div>
+        <h1 class="text-xl font-bold text-gray-800">問卷抽獎系統 <span class="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-normal">Realtime Edition</span></h1>
+      </div>
+      <div class="flex items-center space-x-3 text-sm">
+        <div class="bg-gray-100 px-3 py-1.5 rounded-full flex items-center space-x-2">
+          <span class="text-gray-500">狀態:</span>
+          <span id="sync-status" class="font-medium text-emerald-600 flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span> 雲端同步中
+          </span>
+        </div>
+        <div class="bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full font-medium">
+          <i class="fas fa-users mr-1"></i> 抽獎池: <span id="pool-count">0</span> 人
+        </div>
+        <div class="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full font-medium">
+          <i class="fas fa-trophy mr-1"></i> 已抽出: <span id="winner-count">0</span> 人
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    <div class="flex border-b border-gray-200 mb-6 bg-white/50 p-1.5 rounded-xl shadow-sm">
+      <button onclick="switchTab(1)" id="tab-btn-1" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all bg-white text-rose-600 shadow-sm">1. 資料匯入</button>
+      <button onclick="switchTab(2)" id="tab-btn-2" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all text-gray-500 hover:text-gray-700">2. 獎項設定</button>
+      <button onclick="switchTab(3)" id="tab-btn-3" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all text-gray-500 hover:text-gray-700">3. 開獎舞台</button>
+      <button onclick="switchTab(4)" id="tab-btn-4" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all text-gray-500 hover:text-gray-700">4. 中獎紀錄</button>
+    </div>
+
+    <!-- Tab 1: 資料匯入 -->
+    <div id="tab-1" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2"><i class="fas fa-file-import text-rose-500"></i> 匯入問卷資料 (同步雲端)</h2>
+          <p class="text-xs text-gray-500 mb-4">支援 CSV 或 Excel / Google 試算表內容複製貼上。</p>
+          <button onclick="loadSampleData()" class="w-full mb-3 py-2 px-4 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-xl font-medium border border-amber-200 text-sm flex items-center justify-center gap-2 transition-all">
+            <i class="fas fa-bolt"></i> 載入 50 筆測試資料至雲端
+          </button>
+          <textarea id="csv-input" placeholder="貼上 CSV 文字，格式：姓名, Email, 電話" class="w-full h-32 p-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none mb-3"></textarea>
+          <button onclick="importCSVText()" class="w-full py-2.5 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-all shadow-sm">匯入文字資料</button>
+        </div>
+        <button onclick="clearAllData()" class="mt-4 w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-medium border border-red-200 text-xs transition-all">
+          <i class="fas fa-trash-alt mr-1"></i> 清空雲端所有資料
+        </button>
+      </div>
+
+      <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center justify-between">
+          <span><i class="fas fa-list text-rose-500 mr-2"></i> 雲端名單預覽</span>
+          <span class="text-xs font-normal text-gray-500">總筆數: <span id="participant-total">0</span></span>
+        </h2>
+        <div class="overflow-x-auto max-h-80">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-gray-50 text-gray-600 sticky top-0">
+              <tr><th class="p-2">#</th><th class="p-2">姓名</th><th class="p-2">Email</th><th class="p-2">電話</th></tr>
+            </thead>
+            <tbody id="participant-table-body" class="divide-y divide-gray-100">
+              <tr><td colspan="4" class="text-center py-8 text-gray-400">等待資料匯入...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: 獎項設定 -->
+    <div id="tab-2" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-plus-circle text-rose-500 mr-2"></i> 新增/修改獎項</h2>
+        <form id="prize-form" onsubmit="savePrize(event)" class="space-y-4">
+          <input type="hidden" id="prize-id">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">獎項名稱</label>
+            <input type="text" id="prize-name" required placeholder="如：頭獎 iPhone 15" class="w-full p-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">名額數量</label>
+            <input type="number" id="prize-count" min="1" required placeholder="1" class="w-full p-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none">
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-all shadow-sm">儲存獎項至雲端</button>
+        </form>
+      </div>
+
+      <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-gifts text-rose-500 mr-2"></i> 目前獎項列表 (雲端同步)</h2>
+        <div id="prize-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <p class="text-gray-400 text-sm col-span-2 text-center py-8">尚無獎項資料</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: 開獎舞台 -->
+    <div id="tab-3" class="tab-content hidden">
+      <div class="stage-bg rounded-3xl p-8 text-white text-center shadow-xl relative overflow-hidden">
+        <div class="mb-4 inline-flex items-center gap-2 bg-black/20 backdrop-blur px-4 py-1.5 rounded-full text-xs">
+          <span id="stage-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span id="stage-status-text">即時雲端舞台</span>
+        </div>
+
+        <div class="max-w-md mx-auto mb-6">
+          <label class="block text-xs text-rose-100 mb-2">請選擇抽取獎項：</label>
+          <select id="stage-prize-select" onchange="onPrizeSelectChange()" class="w-full p-3 bg-white text-gray-800 font-bold rounded-2xl shadow-lg border-0 focus:ring-4 focus:ring-amber-300 focus:outline-none text-center">
+            <option value="">載入獎項中...</option>
+          </select>
+        </div>
+
+        <div class="bg-white/95 text-gray-800 rounded-3xl p-8 shadow-2xl max-w-2xl mx-auto mb-6 border border-white/50 min-h-[220px] flex flex-col justify-center items-center">
+          <div id="draw-animation-box" class="space-y-3">
+            <h3 id="draw-winner-name" class="text-4xl md:text-5xl font-black text-rose-600">準備開獎</h3>
+            <p id="draw-winner-info" class="text-sm text-gray-500">請點擊下方按鈕開始抽獎</p>
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-4">
+          <button id="draw-one-btn" onclick="triggerDraw(1)" class="px-6 py-3 bg-amber-400 text-gray-900 font-bold rounded-2xl shadow-lg hover:bg-amber-300 transition-all hover:scale-105 active:scale-95 disabled:opacity-50">
+            <i class="fas fa-dice mr-1"></i> 抽取 1 位中獎者
+          </button>
+          <button id="draw-all-btn" onclick="triggerDraw('all')" class="px-6 py-3 bg-rose-500 text-white font-bold rounded-2xl shadow-lg hover:bg-rose-400 transition-all hover:scale-105 active:scale-95 disabled:opacity-50">
+            <i class="fas fa-bolt mr-1"></i> 一次抽完該獎項
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: 中獎紀錄 -->
+    <div id="tab-4" class="tab-content hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-trophy text-amber-500 mr-2"></i> 中獎歷史紀錄 (雲端同步)</h2>
+        <button onclick="exportWinners()" class="px-4 py-2 bg-emerald-500 text-white text-xs font-medium rounded-xl hover:bg-emerald-600 transition-all shadow-sm">
+          <i class="fas fa-file-excel mr-1"></i> 匯出中獎名單 (CSV)
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-gray-50 text-gray-600">
+            <tr><th class="p-3">獎項</th><th class="p-3">中獎者姓名</th><th class="p-3">Email</th><th class="p-3">電話</th><th class="p-3">抽籤時間</th></tr>
+          </thead>
+          <tbody id="winners-table-body" class="divide-y divide-gray-100">
+            <tr><td colspan="5" class="text-center py-8 text-gray-400">尚無中獎紀錄</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // 專案組態檔 (已補齊專案資訊)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeR79pFgwTfyPjPZOgAuRetxgcJ22cago", // ⚠️ 請更換為您的真實 API Key
+      authDomain: "survey-raffle-system.firebaseapp.com",
+      projectId: "survey-raffle-system",
+      storageBucket: "survey-raffle-system.appspot.com",
+      messagingSenderId: "590171246481",
+      appId: "1:590171246481:web:42ea2582b49d2efb7c1430"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 全域變數
+    window.db = db;
+    let participants = [];
+    let prizes = [];
+    let winners = [];
+    let currentDrawingState = null;
+    let animInterval = null;
+
+    // 匿名驗證登入
+    signInAnonymously(auth).catch(err => console.error("Auth error:", err));
+
+    // 1. 即時監聽「參與者名單」
+    onSnapshot(collection(db, "participants"), (snapshot) => {
+      participants = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      document.getElementById("participant-total").innerText = participants.length;
+      renderParticipants();
+      updateHeaderCounts();
+    });
+
+    // 2. 即時監聽「獎項設定」 (修正無法同步問題)
+    onSnapshot(collection(db, "prizes"), (snapshot) => {
+      prizes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderPrizes();
+      renderStageSelect();
+    });
+
+    // 3. 即時監聽「中獎紀錄」
+    onSnapshot(collection(db, "winners"), (snapshot) => {
+      winners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderWinners();
+      updateHeaderCounts();
+      renderPrizes();
+      renderStageSelect();
+    });
+
+    // 4. 即時監聽「開獎舞台廣播頻道」 (修正現場畫面不同步問題)
+    onSnapshot(doc(db, "systemState", "currentStage"), (snapshot) => {
+      if (snapshot.exists()) {
+        const state = snapshot.data();
+        handleStageStateUpdate(state);
+      }
+    });
+
+    // 更新 Header 統計數據
+    function updateHeaderCounts() {
+      const winnerEmails = new Set(winners.map(w => w.email));
+      const validPoolCount = participants.filter(p => !winnerEmails.has(p.email)).length;
+      document.getElementById("pool-count").innerText = validPoolCount;
+      document.getElementById("winner-count").innerText = winners.length;
+    }
+
+    // 渲染名單
+    function renderParticipants() {
+      const tbody = document.getElementById("participant-table-body");
+      if (participants.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">等待資料匯入...</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = participants.slice(0, 100).map((p, idx) => `
+        <tr class="hover:bg-gray-50">
+          <td class="p-2 text-gray-400">${idx + 1}</td>
+          <td class="p-2 font-medium">${escapeHtml(p.name)}</td>
+          <td class="p-2 text-gray-500">${escapeHtml(p.email)}</td>
+          <td class="p-2 text-gray-500">${escapeHtml(p.phone || '-')}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 渲染獎項
+    function renderPrizes() {
+      const container = document.getElementById("prize-list");
+      if (prizes.length === 0) {
+        container.innerHTML = `<p class="text-gray-400 text-sm col-span-2 text-center py-8">尚無獎項資料</p>`;
+        return;
+      }
+      container.innerHTML = prizes.map(p => {
+        const drawnCount = winners.filter(w => w.prizeId === p.id).length;
+        const remain = Math.max(0, p.count - drawnCount);
+        return `
+          <div class="border border-gray-100 bg-gray-50 p-4 rounded-xl flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-gray-800">${escapeHtml(p.name)}</h3>
+              <p class="text-xs text-gray-500">總名額: ${p.count} | 已抽: ${drawnCount} | 剩餘: <span class="text-rose-600 font-bold">${remain}</span></p>
+            </div>
+            <button onclick="deletePrize('${p.id}')" class="text-red-400 hover:text-red-600 p-2"><i class="fas fa-trash"></i></button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 渲染開獎舞台選單
+    function renderStageSelect() {
+      const select = document.getElementById("stage-prize-select");
+      if (prizes.length === 0) {
+        select.innerHTML = `<option value="">請先新增獎項</option>`;
+        return;
+      }
+      const curVal = select.value;
+      select.innerHTML = prizes.map(p => {
+        const drawnCount = winners.filter(w => w.prizeId === p.id).length;
+        const remain = Math.max(0, p.count - drawnCount);
+        return `<option value="${p.id}">獎項：${escapeHtml(p.name)} (剩餘 ${remain}/${p.count})</option>`;
+      }).join('');
+      if (curVal && prizes.some(p => p.id === curVal)) select.value = curVal;
+    }
+
+    // 處理廣播狀態變更
+    function handleStageStateUpdate(state) {
+      if (!state) return;
+      const animBox = document.getElementById("draw-animation-box");
+      const winnerNameEl = document.getElementById("draw-winner-name");
+      const winnerInfoEl = document.getElementById("draw-winner-info");
+
+      if (state.status === "drawing") {
+        if (!animInterval) {
+          animInterval = setInterval(() => {
+            const randomP = participants[Math.floor(Math.random() * participants.length)];
+            if (randomP) {
+              winnerNameEl.innerText = randomP.name;
+              winnerInfoEl.innerText = "正在抽籤中...";
+            }
+          }, 80);
+        }
+      } else if (state.status === "completed") {
+        if (animInterval) { clearInterval(animInterval); animInterval = null; }
+        if (state.winners && state.winners.length > 0) {
+          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          if (state.winners.length === 1) {
+            winnerNameEl.innerText = state.winners[0].name;
+            winnerInfoEl.innerText = `恭喜獲得：${state.prizeName}`;
+          } else {
+            winnerNameEl.innerText = `共抽出 ${state.winners.length} 位中獎者`;
+            winnerInfoEl.innerText = `請至「中獎紀錄」分頁查看完整名單`;
+          }
+        }
+      }
+    }
+
+    // 觸發雲端抽獎
+    window.triggerDraw = async function(countType) {
+      const prizeId = document.getElementById("stage-prize-select").value;
+      const prize = prizes.find(p => p.id === prizeId);
+      if (!prize) { alert("請選擇有效獎項"); return; }
+
+      const existingWinnersCount = winners.filter(w => w.prizeId === prize.id).length;
+      const remain = prize.count - existingWinnersCount;
+      if (remain <= 0) { alert("該獎項已全部抽出！"); return; }
+
+      const winnerEmails = new Set(winners.map(w => w.email));
+      const pool = participants.filter(p => !winnerEmails.has(p.email));
+      if (pool.length === 0) { alert("合格抽獎池中已無可抽人員！"); return; }
+
+      const countToDraw = countType === 'all' ? Math.min(remain, pool.length) : 1;
+
+      // 1. 發布廣播：抽獎開始
+      await setDoc(doc(db, "systemState", "currentStage"), {
+        status: "drawing",
+        prizeName: prize.name,
+        timestamp: Date.now()
+      });
+
+      // 模擬動畫延遲 2.5 秒
+      setTimeout(async () => {
+        // 隨機抽選
+        const shuffled = [...pool].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, countToDraw);
+
+        // 寫入中獎紀錄
+        const batch = writeBatch(db);
+        const nowStr = new Date().toLocaleString("zh-TW");
+        selected.forEach(winnerP => {
+          const newDocRef = doc(collection(db, "winners"));
+          batch.set(newDocRef, {
+            prizeId: prize.id,
+            prizeName: prize.name,
+            name: winnerP.name,
+            email: winnerP.email,
+            phone: winnerP.phone || '',
+            timestamp: nowStr
+          });
+        });
+        await batch.commit();
+
+        // 2. 發布廣播：抽獎完成
+        await setDoc(doc(db, "systemState", "currentStage"), {
+          status: "completed",
+          prizeName: prize.name,
+          winners: selected,
+          timestamp: Date.now()
+        });
+      }, 2500);
+    };
+
+    // 渲染中獎紀錄
+    function renderWinners() {
+      const tbody = document.getElementById("winners-table-body");
+      if (winners.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">尚無中獎紀錄</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = winners.map(w => `
+        <tr class="hover:bg-amber-50/50">
+          <td class="p-3 font-bold text-rose-600">${escapeHtml(w.prizeName)}</td>
+          <td class="p-3 font-medium">${escapeHtml(w.name)}</td>
+          <td class="p-3 text-gray-500">${escapeHtml(w.email)}</td>
+          <td class="p-3 text-gray-500">${escapeHtml(w.phone || '-')}</td>
+          <td class="p-3 text-gray-400 text-xs">${w.timestamp}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 輔助防 XSS
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // 全域操作函式
+    window.loadSampleData = async function() {
+      const samples = Array.from({ length: 50 }, (_, i) => ({
+        name: `測試使用者 ${i + 1}`,
+        email: `user${i + 1}@example.com`,
+        phone: `0912345${(i + 1).toString().padStart(3, '0')}`
+      }));
+      const batch = writeBatch(db);
+      samples.forEach(s => {
+        const ref = doc(collection(db, "participants"));
+        batch.set(ref, s);
+      });
+      await batch.commit();
+    };
+
+    window.clearAllData = async function() {
+      if (!confirm("確定要清空雲端所有資料（含參與者與中獎紀錄）？")) return;
+      const batch = writeBatch(db);
+      participants.forEach(p => batch.delete(doc(db, "participants", p.id)));
+      winners.forEach(w => batch.delete(doc(db, "winners", w.id)));
+      await batch.commit();
+    };
+
+    window.savePrize = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById("prize-name").value;
+      const count = parseInt(document.getElementById("prize-count").value);
+      const newRef = doc(collection(db, "prizes"));
+      await setDoc(newRef, { name, count });
+      document.getElementById("prize-form").reset();
+    };
+
+    window.deletePrize = async function(id) {
+      if (confirm("確定刪除此獎項？")) await deleteDoc(doc(db, "prizes", id));
+    };
+
+    window.exportWinners = function() {
+      if (winners.length === 0) return alert("無中獎紀錄可匯出");
+      let csv = "\uFEFF獎項,姓名,Email,電話,抽籤時間\n";
+      winners.forEach(w => {
+        csv += `"${w.prizeName}","${w.name}","${w.email}","${w.phone}","${w.timestamp}"\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `中獎名單_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    };
+
+    window.switchTab = function(idx) {
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+      document.querySelectorAll(".tab-btn").forEach(el => {
+        el.classList.remove("bg-white", "text-rose-600", "shadow-sm");
+        el.classList.add("text-gray-500");
+      });
+      document.getElementById(`tab-${idx}`).classList.remove("hidden");
+      const activeBtn = document.getElementById(`tab-btn-${idx}`);
+      activeBtn.classList.add("bg-white", "text-rose-600", "shadow-sm");
+      activeBtn.classList.remove("text-gray-500");
+    };
+  </script>
+</body>
+</html>
