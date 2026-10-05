@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>問卷抽獎系統 - 多人即時同步版</title>
-  <!-- Tailwind CSS -->
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -40,11 +40,9 @@
       }
     }
   </script>
-  <!-- Lucide Icons -->
+
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -80,7 +78,6 @@
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
 
-  <!-- Header -->
   <header class="border-b border-rose-100 bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -96,7 +93,6 @@
 
       <!-- Realtime Sync & Stats Banner -->
       <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-        <!-- Live Realtime Status -->
         <div id="syncStatusBadge" class="flex items-center gap-2 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl border border-slate-200 font-medium">
           <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
           <span class="hidden sm:inline">狀態:</span> <span id="syncStatusText">連接中...</span>
@@ -116,10 +112,8 @@
     </div>
   </header>
 
-  <!-- Main Content Layout -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-grow space-y-6">
 
-    <!-- Stepper Navigation -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
       <button onclick="switchTab('import')" id="tab-import" class="tab-btn active flex items-center gap-3 p-3.5 rounded-2xl border border-brand-500 bg-white text-brand-600 shadow-md shadow-brand-500/10 transition-all font-semibold text-sm sm:text-base">
         <span class="w-7 h-7 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center font-bold text-xs shrink-0 text-brand-600">1</span>
@@ -142,10 +136,8 @@
       </button>
     </div>
 
-    <!-- TAB 1: CSV DATA IMPORT -->
     <section id="content-import" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Import Control Box -->
         <div class="lg:col-span-1 bright-card rounded-3xl p-5 space-y-4 flex flex-col justify-between">
           <div class="space-y-4">
             <div>
@@ -180,7 +172,6 @@
             </div>
           </div>
 
-          <!-- Rules & Info Box -->
           <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-xs space-y-2 text-slate-600">
             <div class="font-bold text-brand-600 flex items-center gap-1.5">
               <i data-lucide="check-circle2" class="w-4 h-4 text-brand-500"></i> 多人實時同步機制
@@ -192,7 +183,6 @@
           </div>
         </div>
 
-        <!-- Imported Data Preview Box -->
         <div class="lg:col-span-2 bright-card rounded-3xl p-5 flex flex-col justify-between space-y-4">
           <div class="space-y-4">
             <div class="flex items-center justify-between flex-wrap gap-2">
@@ -204,7 +194,6 @@
                 <p class="text-xs text-slate-500 mt-0.5" id="dataSummaryText">載入雲端資料中...</p>
               </div>
 
-              <!-- Clear Data Button -->
               <button onclick="clearImportedData()" id="clearDataBtn" disabled class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-brand-600 disabled:opacity-40 disabled:cursor-not-allowed border border-rose-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 清空雲端名單
               </button>
@@ -261,7 +250,6 @@
       </div>
     </section>
 
-    <!-- TAB 2: PRIZE CONFIGURATION -->
     <section id="content-prizes" class="hidden space-y-6">
       <div class="bright-card rounded-3xl p-5 sm:p-6 space-y-6">
         <div class="flex items-center justify-between flex-wrap gap-4">
@@ -278,12 +266,10 @@
           </button>
         </div>
 
-        <!-- Prize List Container -->
         <div id="prizeListContainer" class="space-y-3">
           <!-- Dynamic Prize Cards inserted by JS -->
         </div>
 
-        <!-- Total Quota Summary Bar -->
         <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-6 text-sm">
             <div>
@@ -308,15 +294,12 @@
       </div>
     </section>
 
-    <!-- TAB 3: LUCKY DRAW STAGE -->
     <section id="content-draw" class="hidden space-y-6">
       <div class="relative bg-gradient-to-br from-amber-400 via-rose-500 to-vibrant-orange rounded-3xl p-6 sm:p-10 shadow-xl overflow-hidden min-h-[460px] flex flex-col justify-between items-center text-center text-white">
         
-        <!-- Background Decorative Bubbles -->
         <div class="absolute -top-12 -left-12 w-48 h-48 bg-white/20 rounded-full blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-12 -right-12 w-64 h-64 bg-yellow-300/30 rounded-full blur-3xl pointer-events-none"></div>
 
-        <!-- Stage Header Selector -->
         <div class="w-full max-w-xl space-y-2 z-10">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-xs font-semibold text-white mb-1 shadow-sm">
             <span class="w-2 h-2 rounded-full bg-yellow-300 animate-pulse"></span> 雲端開獎控制台
@@ -325,44 +308,36 @@
           <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
             <label class="text-xs text-white/90 font-medium shrink-0">目前抽取獎項：</label>
             <select id="stagePrizeSelect" onchange="handleStagePrizeChange()" class="w-full sm:w-auto bg-white text-slate-800 font-bold text-base sm:text-lg rounded-2xl px-4 py-2 focus:outline-none shadow-md">
-              <!-- Options populated by JS -->
             </select>
           </div>
           <p id="stagePrizeProgress" class="text-xs text-white/90 font-medium">剩餘名額：<span class="text-yellow-200 font-bold">0</span> 名</p>
         </div>
 
-        <!-- Central Ticker Display -->
         <div class="w-full max-w-2xl my-6 z-10">
           <div id="tickerCard" class="relative bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 shadow-2xl transition-all duration-300 flex flex-col items-center justify-center min-h-[170px] text-slate-800 border-2 border-white">
             
-            <!-- Confetti Canvas Anchor -->
             <canvas id="confettiCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
 
             <div id="tickerSubLabel" class="text-xs sm:text-sm font-bold text-brand-500 tracking-wider mb-1 uppercase">
               Ready to draw
             </div>
 
-            <!-- Ticker Name Display -->
             <div id="tickerName" class="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-wide my-1 min-h-[3rem] flex items-center justify-center">
               準備開獎
             </div>
 
-            <!-- Ticker Info Email/Phone -->
             <div id="tickerDetail" class="text-xs sm:text-sm text-slate-500 font-mono min-h-[1.25rem]">
               點擊下方按鈕開始抽取中獎者
             </div>
           </div>
         </div>
 
-        <!-- Stage Buttons Controls -->
         <div class="z-10 w-full max-w-md space-y-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Draw Single Winner -->
             <button id="drawOneBtn" onclick="triggerDraw(1)" disabled class="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 disabled:bg-white/30 disabled:text-white/50 text-white font-bold rounded-2xl text-base shadow-lg disabled:shadow-none transition-all transform active:scale-95 flex items-center justify-center gap-2">
               <i data-lucide="sparkles" class="w-5 h-5 text-yellow-300"></i> 抽取 1 位中獎者
             </button>
 
-            <!-- Batch Draw Remaining -->
             <button id="drawAllBtn" onclick="triggerDrawAll()" disabled class="w-full py-3.5 px-6 bg-white/90 hover:bg-white text-slate-900 disabled:bg-white/30 disabled:text-white/50 font-bold rounded-2xl text-sm transition-all shadow-md flex items-center justify-center gap-2">
               <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> 一次抽完該獎項
             </button>
@@ -381,7 +356,6 @@
       </div>
     </section>
 
-    <!-- TAB 4: RESULTS & EXPORT -->
     <section id="content-results" class="hidden space-y-6">
       <div class="bright-card rounded-3xl p-5 space-y-4">
         
@@ -395,19 +369,16 @@
           </div>
 
           <div class="flex items-center gap-2 flex-wrap">
-            <!-- Privacy Masking Toggle -->
             <button onclick="togglePrivacyMask()" id="maskToggleBtn" class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-2xl border border-slate-200 shadow-sm transition flex items-center gap-1.5">
               <i data-lucide="eye-off" class="w-4 h-4"></i> 隱私遮蔽：開啟
             </button>
 
-            <!-- CSV Export Button -->
             <button onclick="exportWinnersCSV()" id="exportCsvBtn" disabled class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold rounded-2xl transition shadow-md shadow-emerald-500/20 flex items-center gap-1.5">
               <i data-lucide="download" class="w-4 h-4"></i> 下載中獎名單 (CSV)
             </button>
           </div>
         </div>
 
-        <!-- Filter Bar -->
         <div class="flex items-center gap-3 bg-slate-50/80 p-3 rounded-2xl border border-slate-200/80 text-xs">
           <span class="text-slate-500 shrink-0">篩選獎項：</span>
           <select id="resultPrizeFilter" onchange="renderResultsTable()" class="bg-white border border-slate-200 text-slate-800 font-semibold rounded-xl px-3 py-1.5 focus:outline-none shadow-sm">
@@ -416,7 +387,6 @@
           <span class="text-slate-400 ml-auto" id="resultsCountSummary">共 0 筆紀錄</span>
         </div>
 
-        <!-- Results Table -->
         <div class="border border-slate-200/80 rounded-2xl overflow-hidden bg-white/50">
           <div class="max-h-96 overflow-y-auto custom-scrollbar">
             <table class="w-full text-left text-xs sm:text-sm">
@@ -441,7 +411,6 @@
           </div>
         </div>
 
-        <!-- Clear Results Danger Zone -->
         <div class="pt-2 flex justify-end">
           <button onclick="confirmResetWinners()" id="resetWinnersBtn" disabled class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-brand-600 border border-rose-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
             <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 重置雲端中獎紀錄 (放回抽獎池)
@@ -453,8 +422,6 @@
 
   </main>
 
-  <!-- Modals -->
-  <!-- Generic Modal Dialog -->
   <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-slate-100 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <div class="flex items-center gap-3 text-amber-500" id="modalIconContainer">
@@ -470,7 +437,6 @@
     </div>
   </div>
 
-  <!-- Paste Raw Text Data Modal -->
   <div id="pasteModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-slate-100 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -493,10 +459,8 @@
     </div>
   </div>
 
-  <!-- Toast Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Firebase / Supabase Firestore Realtime Script Integration -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { 
@@ -515,9 +479,6 @@
       getDocs
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    /* ==========================================================================
-       FIREBASE CONFIG & INITIALIZATION
-       ========================================================================== */
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'lottery-system-app';
     const firebaseConfig = typeof __firebase_config !== 'undefined'
       ? JSON.parse(__firebase_config)
@@ -536,12 +497,11 @@
 
     let currentUser = null;
 
-    // Cloud Collection Paths strictly aligned with Rule 1
+    // Strict Cloud Collection Paths aligned with Rule 1
     const participantsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
     const prizesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'prizes');
     const winnersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'winners');
 
-    // System States
     window.rawData = [];
     window.eligiblePool = [];
     window.winnersList = [];
@@ -553,9 +513,6 @@
 
     let lastKnownWinnerCount = 0;
 
-    /* ==========================================================================
-       AUTHENTICATION & REALTIME LISTENERS
-       ========================================================================== */
     async function initCloudSync() {
       const statusBadge = document.getElementById('syncStatusBadge');
       const statusText = document.getElementById('syncStatusText');
@@ -573,7 +530,6 @@
           statusText.innerText = "🟢 多人同步中";
         }
 
-        // Attach Realtime Listeners
         setupParticipantsListener();
         setupPrizesListener();
         setupWinnersListener();
@@ -584,12 +540,10 @@
           statusBadge.className = "flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl border border-amber-200 font-medium";
           statusText.innerText = "🟡 展示模式 (本機數據)";
         }
-        // Fallback default state
         applyDeduplication();
       }
     }
 
-    // 1. Realtime Participants Listener
     function setupParticipantsListener() {
       if (!currentUser) return;
       onSnapshot(participantsColRef, (snapshot) => {
@@ -602,18 +556,15 @@
       });
     }
 
-    // 2. Realtime Prizes Listener
     function setupPrizesListener() {
       if (!currentUser) return;
       onSnapshot(prizesColRef, (snapshot) => {
         if (snapshot.empty) {
-          // Push default prizes to cloud if database is fresh
           seedDefaultPrizes();
           return;
         }
         const list = [];
         snapshot.forEach(docSnap => list.push(docSnap.data()));
-        // Keep prize sort order
         list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
         window.prizes = list;
         renderPrizeList();
@@ -633,7 +584,6 @@
       await batch.commit();
     }
 
-    // 3. Realtime Winners Listener
     function setupWinnersListener() {
       if (!currentUser) return;
       onSnapshot(winnersColRef, (snapshot) => {
@@ -650,7 +600,6 @@
         updateStagePrizeOptions();
 
         if (isNewWinnerDrawn) {
-          // Trigger confetti for all connected viewers when someone draws!
           fireConfetti();
           playFanfareSound();
           showToast('⚡ 雲端有最新中獎結果產生！', 'success');
@@ -660,9 +609,6 @@
       });
     }
 
-    /* ==========================================================================
-       EXPOSED CLOUD MUTATION WRAPPERS
-       ========================================================================== */
     window.saveParticipantsToCloud = async function(parsedItems) {
       if (!currentUser) {
         window.rawData = parsedItems;
@@ -671,7 +617,6 @@
       }
 
       showToast('正在寫入雲端資料庫...', 'info');
-      // Write batch to Firestore
       const batch = writeBatch(db);
       parsedItems.forEach(item => {
         const docRef = doc(participantsColRef, item.id);
@@ -731,16 +676,12 @@
       showToast('已重置雲端中獎紀錄', 'info');
     };
 
-    // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
       initCloudSync();
     });
   </script>
 
   <script>
-    /* ==========================================================================
-       LOCAL UI & CONTROLLER LOGIC
-       ========================================================================== */
     let isPrivacyMasked = true;
     let isDrawingRunning = false;
     let audioCtx = null;
