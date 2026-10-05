@@ -18,19 +18,19 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center space-x-3">
         <div class="p-2 bg-rose-500 text-white rounded-lg"><i class="fas fa-gift text-xl"></i></div>
-        <h1 class="text-xl font-bold text-gray-800">問卷抽獎系統 <span class="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-normal">Realtime Edition</span></h1>
+        <h1 class="text-xl font-black text-gray-800">問卷抽獎系統 <span class="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-bold">Realtime Edition</span></h1>
       </div>
       <div class="flex items-center space-x-3 text-sm">
         <div class="bg-gray-100 px-3 py-1.5 rounded-full flex items-center space-x-2">
-          <span class="text-gray-500">狀態:</span>
-          <span id="sync-status" class="font-medium text-emerald-600 flex items-center gap-1">
+          <span class="text-gray-700 font-bold">狀態:</span>
+          <span id="sync-status" class="font-bold text-emerald-600 flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span> 雲端同步中
           </span>
         </div>
-        <div class="bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full font-medium">
+        <div class="bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full font-bold">
           <i class="fas fa-users mr-1"></i> 抽獎池: <span id="pool-count">0</span> 人
         </div>
-        <div class="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full font-medium">
+        <div class="bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full font-bold">
           <i class="fas fa-trophy mr-1"></i> 已抽出: <span id="winner-count">0</span> 人
         </div>
       </div>
@@ -40,10 +40,10 @@
   <!-- Navigation Tabs -->
   <main class="max-w-7xl mx-auto px-4 py-6">
     <div class="flex border-b border-gray-200 mb-6 bg-white/50 p-1.5 rounded-xl shadow-sm">
-      <button onclick="changeTab(1)" id="tab-btn-1" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all bg-white text-rose-600 shadow-sm">1. 資料匯入</button>
-      <button onclick="changeTab(2)" id="tab-btn-2" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all text-gray-500 hover:text-gray-700">2. 獎項設定</button>
-      <button onclick="changeTab(3)" id="tab-btn-3" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all text-gray-500 hover:text-gray-700">3. 開獎舞台</button>
-      <button onclick="changeTab(4)" id="tab-btn-4" class="tab-btn flex-1 py-2.5 rounded-lg font-medium text-center transition-all text-gray-500 hover:text-gray-700">4. 中獎紀錄</button>
+      <button onclick="changeTab(1)" id="tab-btn-1" class="tab-btn flex-1 py-2.5 rounded-lg font-black text-center transition-all bg-white text-rose-600 shadow-sm">1. 資料匯入</button>
+      <button onclick="changeTab(2)" id="tab-btn-2" class="tab-btn flex-1 py-2.5 rounded-lg font-bold text-center transition-all text-gray-600 hover:text-gray-900">2. 獎項設定</button>
+      <button onclick="changeTab(3)" id="tab-btn-3" class="tab-btn flex-1 py-2.5 rounded-lg font-bold text-center transition-all text-gray-600 hover:text-gray-900">3. 開獎舞台</button>
+      <button onclick="changeTab(4)" id="tab-btn-4" class="tab-btn flex-1 py-2.5 rounded-lg font-bold text-center transition-all text-gray-600 hover:text-gray-900">4. 中獎紀錄</button>
     </div>
 
     <!-- Tab 1: 資料匯入 -->
@@ -51,16 +51,18 @@
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
         <div>
           <h2 class="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2"><i class="fas fa-file-import text-rose-500"></i> 匯入問卷資料</h2>
-          <p class="text-xs text-gray-500 mb-4">支援 CSV 或 Excel 複製貼上。</p>
-          <button onclick="loadSampleData()" class="w-full mb-3 py-2 px-4 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-xl font-medium border border-amber-200 text-sm flex items-center justify-center gap-2 transition-all">
+          <p class="text-xs text-gray-500 mb-4">支援 CSV、Excel 複製貼上，或空格/逗點分隔文字。</p>
+          <button onclick="loadSampleData()" class="w-full mb-3 py-2 px-4 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-xl font-bold border border-amber-200 text-sm flex items-center justify-center gap-2 transition-all">
             <i class="fas fa-bolt"></i> 載入 50 筆測試資料
           </button>
-          <textarea id="csv-input" placeholder="貼上 CSV 文字，格式：姓名, Email, 電話" class="w-full h-32 p-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none mb-3"></textarea>
-          <button onclick="importCSVText()" class="w-full py-2.5 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-all shadow-sm">匯入文字資料</button>
+          <textarea id="csv-input" placeholder="貼上文字，格式如：
+王曉明 AA@123.com 123045
+陳小美, BB@456.com, 546123" class="w-full h-32 p-3 text-xs border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none mb-3"></textarea>
+          <button onclick="importCSVText()" class="w-full py-2.5 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 transition-all shadow-sm">匯入文字資料</button>
         </div>
         
         <div class="mt-6 pt-4 border-t border-gray-100">
-          <button onclick="clearCollectionData('participants')" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-medium border border-red-200 text-xs transition-all flex items-center justify-center gap-1">
+          <button onclick="clearCollectionData('participants')" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold border border-red-200 text-xs transition-all flex items-center justify-center gap-1">
             <i class="fas fa-trash-alt"></i> 僅清空參加者名單
           </button>
         </div>
@@ -69,15 +71,15 @@
       <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center justify-between">
           <span><i class="fas fa-list text-rose-500 mr-2"></i> 雲端名單預覽</span>
-          <span class="text-xs font-normal text-gray-500">總筆數: <span id="participant-total">0</span></span>
+          <span class="text-xs font-bold text-gray-500">總筆數: <span id="participant-total">0</span></span>
         </h2>
         <div class="overflow-x-auto max-h-80">
           <table class="w-full text-left text-xs">
-            <thead class="bg-gray-50 text-gray-600 sticky top-0">
+            <thead class="bg-gray-50 text-gray-700 font-bold sticky top-0">
               <tr><th class="p-2">#</th><th class="p-2">姓名</th><th class="p-2">Email</th><th class="p-2">電話</th></tr>
             </thead>
             <tbody id="participant-table-body" class="divide-y divide-gray-100">
-              <tr><td colspan="4" class="text-center py-8 text-gray-400">等待資料匯入...</td></tr>
+              <tr><td colspan="4" class="text-center py-8 text-gray-400 font-medium">等待資料匯入...</td></tr>
             </tbody>
           </table>
         </div>
@@ -92,19 +94,19 @@
           <form id="prize-form" onsubmit="savePrize(event)" class="space-y-4">
             <input type="hidden" id="prize-id">
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">獎項名稱</label>
+              <label class="block text-xs font-bold text-gray-700 mb-1">獎項名稱</label>
               <input type="text" id="prize-name" required placeholder="如：頭獎 iPhone 15" class="w-full p-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none">
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-1">名額數量</label>
+              <label class="block text-xs font-bold text-gray-700 mb-1">名額數量</label>
               <input type="number" id="prize-count" min="1" required placeholder="1" class="w-full p-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-400 focus:outline-none">
             </div>
-            <button type="submit" class="w-full py-2.5 bg-rose-500 text-white rounded-xl font-medium hover:bg-rose-600 transition-all shadow-sm">儲存獎項至雲端</button>
+            <button type="submit" class="w-full py-2.5 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 transition-all shadow-sm">儲存獎項至雲端</button>
           </form>
         </div>
 
         <div class="mt-6 pt-4 border-t border-gray-100">
-          <button onclick="clearCollectionData('prizes')" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-medium border border-red-200 text-xs transition-all flex items-center justify-center gap-1">
+          <button onclick="clearCollectionData('prizes')" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold border border-red-200 text-xs transition-all flex items-center justify-center gap-1">
             <i class="fas fa-trash-alt"></i> 僅清空所有獎項
           </button>
         </div>
@@ -113,7 +115,7 @@
       <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 class="text-lg font-bold text-gray-800 mb-4"><i class="fas fa-gifts text-rose-500 mr-2"></i> 目前獎項列表 (雲端同步)</h2>
         <div id="prize-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <p class="text-gray-400 text-sm col-span-2 text-center py-8">尚無獎項資料</p>
+          <p class="text-gray-400 text-sm col-span-2 text-center py-8 font-medium">尚無獎項資料</p>
         </div>
       </div>
     </div>
@@ -121,23 +123,23 @@
     <!-- Tab 3: 開獎舞台 -->
     <div id="tab-3" class="tab-content hidden">
       <div class="stage-bg rounded-3xl p-8 text-white text-center shadow-xl relative overflow-hidden">
-        <div class="mb-4 inline-flex items-center gap-2 bg-black/20 backdrop-blur px-4 py-1.5 rounded-full text-xs">
+        <div class="mb-4 inline-flex items-center gap-2 bg-black/20 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold">
           <span id="stage-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
           <span id="stage-status-text">雲端同步舞台</span>
         </div>
 
         <div class="max-w-md mx-auto mb-6">
-          <label class="block text-xs text-rose-100 mb-2">目前抽取獎項：</label>
-          <select id="stage-prize-select" onchange="onPrizeSelectChange()" class="w-full p-3 bg-white text-gray-800 font-bold rounded-2xl shadow-lg border-0 focus:ring-4 focus:ring-amber-300 focus:outline-none text-center">
+          <label class="block text-xs text-rose-100 mb-2 font-bold">目前抽取獎項：</label>
+          <select id="stage-prize-select" onchange="onPrizeSelectChange()" class="w-full p-3 bg-white text-gray-800 font-black rounded-2xl shadow-lg border-0 focus:ring-4 focus:ring-amber-300 focus:outline-none text-center">
             <option value="">載入獎項中...</option>
           </select>
         </div>
 
         <div class="bg-white/95 text-gray-800 rounded-3xl p-8 shadow-2xl max-w-2xl mx-auto mb-6 border border-white/50 min-h-[220px] flex flex-col justify-center items-center">
           <div id="draw-animation-box" class="space-y-3">
-            <p id="draw-status-tag" class="text-xs text-amber-500 font-bold tracking-widest uppercase">READY TO DRAW</p>
+            <p id="draw-status-tag" class="text-xs text-amber-500 font-black tracking-widest uppercase">READY TO DRAW</p>
             <h3 id="draw-winner-name" class="text-4xl md:text-5xl font-black text-rose-600">準備開獎</h3>
-            <p id="draw-winner-info" class="text-sm text-gray-500">點擊下方按鈕開始抽取中獎者</p>
+            <p id="draw-winner-info" class="text-sm text-gray-500 font-bold">點擊下方按鈕開始抽取中獎者</p>
           </div>
         </div>
 
@@ -157,21 +159,21 @@
       <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-trophy text-amber-500 mr-2"></i> 中獎歷史紀錄 (雲端同步)</h2>
         <div class="flex items-center gap-2">
-          <button onclick="exportWinners()" class="px-4 py-2 bg-emerald-500 text-white text-xs font-medium rounded-xl hover:bg-emerald-600 transition-all shadow-sm flex items-center gap-1">
+          <button onclick="exportWinners()" class="px-4 py-2 bg-emerald-500 text-white text-xs font-bold rounded-xl hover:bg-emerald-600 transition-all shadow-sm flex items-center gap-1">
             <i class="fas fa-file-excel"></i> 匯出中獎名單 (CSV)
           </button>
-          <button onclick="clearCollectionData('winners')" class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-medium border border-red-200 text-xs transition-all flex items-center gap-1">
+          <button onclick="clearCollectionData('winners')" class="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold border border-red-200 text-xs transition-all flex items-center gap-1">
             <i class="fas fa-trash-alt"></i> 清空中獎紀錄
           </button>
         </div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
-          <thead class="bg-gray-50 text-gray-600">
+          <thead class="bg-gray-50 text-gray-700 font-bold">
             <tr><th class="p-3">獎項</th><th class="p-3">中獎者姓名</th><th class="p-3">Email</th><th class="p-3">電話</th><th class="p-3">抽籤時間</th></tr>
           </thead>
           <tbody id="winners-table-body" class="divide-y divide-gray-100">
-            <tr><td colspan="5" class="text-center py-8 text-gray-400">尚無中獎紀錄</td></tr>
+            <tr><td colspan="5" class="text-center py-8 text-gray-400 font-medium">尚無中獎紀錄</td></tr>
           </tbody>
         </table>
       </div>
@@ -247,14 +249,14 @@
       currentActiveTab = idx;
       document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
       document.querySelectorAll(".tab-btn").forEach(el => {
-        el.classList.remove("bg-white", "text-rose-600", "shadow-sm");
-        el.classList.add("text-gray-500");
+        el.classList.remove("bg-white", "text-rose-600", "shadow-sm", "font-black");
+        el.classList.add("text-gray-600", "font-bold");
       });
       document.getElementById(`tab-${idx}`).classList.remove("hidden");
       const activeBtn = document.getElementById(`tab-btn-${idx}`);
       if(activeBtn) {
-        activeBtn.classList.add("bg-white", "text-rose-600", "shadow-sm");
-        activeBtn.classList.remove("text-gray-500");
+        activeBtn.classList.add("bg-white", "text-rose-600", "shadow-sm", "font-black");
+        activeBtn.classList.remove("text-gray-600");
       }
     }
 
@@ -287,7 +289,7 @@
 
       if (state.status === "drawing") {
         statusTag.innerText = "DRAWING...";
-        statusTag.className = "text-xs text-rose-500 font-bold tracking-widest uppercase animate-pulse";
+        statusTag.className = "text-xs text-rose-500 font-black tracking-widest uppercase animate-pulse";
         
         if (!animInterval) {
           animInterval = setInterval(() => {
@@ -302,7 +304,7 @@
         if (animInterval) { clearInterval(animInterval); animInterval = null; }
         
         statusTag.innerText = "CONGRATULATIONS!";
-        statusTag.className = "text-xs text-emerald-600 font-bold tracking-widest uppercase";
+        statusTag.className = "text-xs text-emerald-600 font-black tracking-widest uppercase";
 
         if (state.winners && state.winners.length > 0) {
           try { confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } }); } catch(e){}
@@ -319,7 +321,7 @@
       } else if (state.status === "idle") {
         if (animInterval) { clearInterval(animInterval); animInterval = null; }
         statusTag.innerText = "READY TO DRAW";
-        statusTag.className = "text-xs text-amber-500 font-bold tracking-widest uppercase";
+        statusTag.className = "text-xs text-amber-500 font-black tracking-widest uppercase";
         winnerNameEl.innerText = "準備開獎";
         winnerInfoEl.innerText = "點擊下方按鈕開始抽取中獎者";
       }
@@ -385,15 +387,15 @@
     function renderParticipants() {
       const tbody = document.getElementById("participant-table-body");
       if (participants.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400">等待資料匯入...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-gray-400 font-medium">等待資料匯入...</td></tr>`;
         return;
       }
       tbody.innerHTML = participants.slice(0, 100).map((p, idx) => `
         <tr class="hover:bg-gray-50">
-          <td class="p-2 text-gray-400">${idx + 1}</td>
-          <td class="p-2 font-medium">${escapeHtml(p.name || '未提供姓名')}</td>
-          <td class="p-2 text-gray-500">${escapeHtml(p.email)}</td>
-          <td class="p-2 text-gray-500">${escapeHtml(p.phone || '無')}</td>
+          <td class="p-2 text-gray-400 font-bold">${idx + 1}</td>
+          <td class="p-2 font-bold">${escapeHtml(p.name || '未提供姓名')}</td>
+          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.email)}</td>
+          <td class="p-2 text-gray-600 font-medium">${escapeHtml(p.phone || '無')}</td>
         </tr>
       `).join('');
     }
@@ -401,7 +403,7 @@
     function renderPrizes() {
       const container = document.getElementById("prize-list");
       if (prizes.length === 0) {
-        container.innerHTML = `<p class="text-gray-400 text-sm col-span-2 text-center py-8">尚無獎項資料</p>`;
+        container.innerHTML = `<p class="text-gray-400 text-sm col-span-2 text-center py-8 font-medium">尚無獎項資料</p>`;
         return;
       }
       container.innerHTML = prizes.map(p => {
@@ -411,7 +413,7 @@
           <div class="border border-gray-100 bg-gray-50 p-4 rounded-xl flex items-center justify-between">
             <div>
               <h3 class="font-bold text-gray-800">${escapeHtml(p.name)}</h3>
-              <p class="text-xs text-gray-500">名額: ${p.count} | 已抽: ${drawnCount} | 剩餘: <span class="text-rose-600 font-bold">${remain}</span></p>
+              <p class="text-xs text-gray-600 font-bold">名額: ${p.count} | 已抽: ${drawnCount} | 剩餘: <span class="text-rose-600 font-black">${remain}</span></p>
             </div>
             <button onclick="deletePrize('${p.id}')" class="text-red-400 hover:text-red-600 p-2"><i class="fas fa-trash"></i></button>
           </div>
@@ -437,16 +439,16 @@
     function renderWinners() {
       const tbody = document.getElementById("winners-table-body");
       if (winners.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">尚無中獎紀錄</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400 font-medium">尚無中獎紀錄</td></tr>`;
         return;
       }
       tbody.innerHTML = winners.map(w => `
         <tr class="hover:bg-amber-50/50">
           <td class="p-3 font-bold text-rose-600">${escapeHtml(w.prizeName)}</td>
-          <td class="p-3 font-medium">${escapeHtml(w.name)}</td>
-          <td class="p-3 text-gray-500">${escapeHtml(w.email)}</td>
-          <td class="p-3 text-gray-500">${escapeHtml(w.phone || '-')}</td>
-          <td class="p-3 text-gray-400 text-xs">${w.timestamp}</td>
+          <td class="p-3 font-bold text-gray-800">${escapeHtml(w.name)}</td>
+          <td class="p-3 text-gray-600 font-medium">${escapeHtml(w.email)}</td>
+          <td class="p-3 text-gray-600 font-medium">${escapeHtml(w.phone || '-')}</td>
+          <td class="p-3 text-gray-400 text-xs font-medium">${w.timestamp}</td>
         </tr>
       `).join('');
     }
@@ -469,27 +471,45 @@
       await batch.commit();
     };
 
+    // 🛠️ 支援 逗號、Tab、空格切分 (全面相容各種貼上格式)
     window.importCSVText = async function() {
       const text = document.getElementById("csv-input").value.trim();
-      if (!text) return alert("請輸入 CSV 文字內容");
+      if (!text) return alert("請輸入文字內容");
+      
       const lines = text.split("\n");
       const batch = writeBatch(db);
       let count = 0;
+
       lines.forEach(line => {
-        const parts = line.split(",").map(s => s.trim());
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
+
+        // 優先使用逗號、Tab 或 2個以上連續空格切分
+        let parts = trimmedLine.split(/[\t,]+|\s{2,}/).map(s => s.trim()).filter(Boolean);
+
+        // 若依然只有一段，改嘗試單一空格切分
+        if (parts.length === 1) {
+          parts = trimmedLine.split(/\s+/).map(s => s.trim()).filter(Boolean);
+        }
+
         if (parts.length >= 2) {
           const ref = doc(collection(db, "participants"));
           batch.set(ref, {
             name: parts[0] || '未提供姓名',
-            email: parts[1],
+            email: parts[1] || '',
             phone: parts[2] || ''
           });
           count++;
         }
       });
-      await batch.commit();
-      document.getElementById("csv-input").value = "";
-      alert(`已成功匯入 ${count} 筆資料！`);
+
+      if (count > 0) {
+        await batch.commit();
+        document.getElementById("csv-input").value = "";
+        alert(`已成功匯入 ${count} 筆資料！`);
+      } else {
+        alert("未能解析出有效的資料，請確認格式（姓名 Email 電話）");
+      }
     };
 
     // 🛠️ 通用獨立清除函式 (支援分別清除：participants, prizes, winners)
@@ -508,7 +528,6 @@
       snapshot.docs.forEach(docSnap => batch.delete(docSnap.ref));
       await batch.commit();
 
-      // 如果清空的是 winners 或 prizes，同步重置開獎舞台狀態
       if (targetCollection === 'winners' || targetCollection === 'prizes') {
         await setDoc(doc(db, "systemState", "currentStage"), {
           status: "idle",
