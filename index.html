@@ -136,7 +136,6 @@
       </button>
     </div>
 
-    <!-- Data Import Section -->
     <section id="content-import" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 bright-card rounded-3xl p-5 space-y-4 flex flex-col justify-between">
@@ -144,7 +143,7 @@
             <div>
               <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <i data-lucide="file-up" class="w-5 h-5 text-brand-500"></i>
-                匯入問卷資料 (同步雲端)
+                匯入問卷資料
               </h2>
               <p class="text-xs text-slate-500 mt-1">支援一般 CSV 檔或 Excel/Google 試算表內容貼上。</p>
             </div>
@@ -159,27 +158,31 @@
               <p class="text-xs text-slate-400">支援 UTF-8 / Big5 編碼檔</p>
             </label>
 
+            <!-- Text Box Direct Input Section -->
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+              <label class="text-xs font-bold text-slate-700 block">貼上文字，可為單欄或多欄：</label>
+              <textarea id="directPasteText" rows="4" placeholder="AA@123.com&#10;BB@456.com&#10;陳小美 BB@456.com 546123&#10;王曉明 AA@123.com 123045" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs font-mono text-slate-800 focus:outline-none focus:border-brand-500 custom-scrollbar"></textarea>
+              <button onclick="submitDirectText()" class="w-full py-2.5 bg-gradient-to-r from-brand-500 to-vibrant-orange hover:from-brand-600 hover:to-vibrant-orange text-white font-bold rounded-2xl text-xs transition shadow-md shadow-brand-500/20 flex items-center justify-center gap-1.5">
+                <i data-lucide="file-plus" class="w-4 h-4"></i> 匯入文字資料
+              </button>
+            </div>
+
             <!-- Quick Action Buttons -->
             <div class="pt-2 space-y-2">
               <button onclick="generateMockData()" class="w-full py-2.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold rounded-2xl border border-amber-200 transition flex items-center justify-center gap-2 shadow-sm">
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
                 ⚡ 載入 50 筆測試資料至雲端
               </button>
-              
-              <button onclick="openPasteModal()" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-2xl border border-slate-200 transition flex items-center justify-center gap-2 shadow-sm">
-                <i data-lucide="clipboard-type" class="w-4 h-4 text-slate-500"></i>
-                📋 貼上 CSV / 表格文字匯入
-              </button>
             </div>
           </div>
 
-          <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-xs space-y-2 text-slate-600">
+          <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-xs space-y-2 text-slate-600 mt-4">
             <div class="font-bold text-brand-600 flex items-center gap-1.5">
-              <i data-lucide="check-circle2" class="w-4 h-4 text-brand-500"></i> 自動去重與同步機制
+              <i data-lucide="check-circle2" class="w-4 h-4 text-brand-500"></i> 強制自動去重機制
             </div>
             <ul class="list-disc list-inside space-y-1 text-slate-500 leading-relaxed">
-              <li><strong class="text-slate-700">自動刪除重複：</strong>匯入時系統會自動刪除相同的 E-mail 或 姓名，僅留下未重複的唯一名單。</li>
-              <li><strong class="text-slate-700">即時開獎：</strong>任一管理員抽獎，所有人畫面同步跳出開獎動畫。</li>
+              <li><strong class="text-slate-700">寫入前去重：</strong>匯入時系統會強制自動剔除重複的 Email、姓名或電話，僅將唯一的有效名單寫入雲端。</li>
+              <li><strong class="text-slate-700">即時同步：</strong>管理員抽獎時，所有人的螢幕畫面同步呈現開獎效果。</li>
             </ul>
           </div>
         </div>
@@ -190,13 +193,13 @@
               <div>
                 <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <i data-lucide="database" class="w-5 h-5 text-vibrant-teal"></i>
-                  雲端抽獎名單預覽
+                  雲端名單預覽
                 </h2>
                 <p class="text-xs text-slate-500 mt-0.5" id="dataSummaryText">載入雲端資料中...</p>
               </div>
 
               <button onclick="clearImportedData()" id="clearDataBtn" disabled class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-brand-600 disabled:opacity-40 disabled:cursor-not-allowed border border-rose-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 清空雲端名單
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> 清空參加者名單
               </button>
             </div>
 
@@ -207,7 +210,7 @@
                 <div class="text-base sm:text-xl font-black text-slate-800 mt-0.5" id="statRawCount">0</div>
               </div>
               <div class="bg-amber-50/60 border border-amber-100 p-3 rounded-2xl text-center">
-                <div class="text-xs text-slate-500">重複刪除數 (Email/姓名)</div>
+                <div class="text-xs text-slate-500">已剔除重複筆數</div>
                 <div class="text-base sm:text-xl font-black text-amber-600 mt-0.5" id="statDedupeCount">0</div>
               </div>
               <div class="bg-emerald-50/60 border border-emerald-100 p-3 rounded-2xl text-center">
@@ -218,12 +221,12 @@
 
             <!-- Data Table Preview -->
             <div class="border border-slate-200/80 rounded-2xl overflow-hidden bg-white/50">
-              <div class="max-h-72 overflow-y-auto custom-scrollbar">
+              <div class="max-h-80 overflow-y-auto custom-scrollbar">
                 <table class="w-full text-left text-xs sm:text-sm">
                   <thead class="bg-slate-100 text-slate-700 sticky top-0 uppercase tracking-wider font-semibold border-b border-slate-200">
                     <tr>
                       <th class="py-2.5 px-3">#</th>
-                      <th class="py-2.5 px-3">姓名</th>
+                      <th class="py-2.5 px-3">姓名 / 主要資料</th>
                       <th class="py-2.5 px-3">Email</th>
                       <th class="py-2.5 px-3">電話</th>
                       <th class="py-2.5 px-3 text-right">狀態</th>
@@ -251,7 +254,6 @@
       </div>
     </section>
 
-    <!-- Prize Settings Section -->
     <section id="content-prizes" class="hidden space-y-6">
       <div class="bright-card rounded-3xl p-5 sm:p-6 space-y-6">
         <div class="flex items-center justify-between flex-wrap gap-4">
@@ -269,7 +271,7 @@
         </div>
 
         <div id="prizeListContainer" class="space-y-3">
-          <!-- Dynamic Prize Cards inserted by JS -->
+          <!-- Dynamic Prize Cards -->
         </div>
 
         <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
@@ -296,7 +298,6 @@
       </div>
     </section>
 
-    <!-- Draw Stage Section -->
     <section id="content-draw" class="hidden space-y-6">
       <div class="relative bg-gradient-to-br from-amber-400 via-rose-500 to-vibrant-orange rounded-3xl p-6 sm:p-10 shadow-xl overflow-hidden min-h-[460px] flex flex-col justify-between items-center text-center text-white">
         
@@ -359,7 +360,6 @@
       </div>
     </section>
 
-    <!-- Results Section -->
     <section id="content-results" class="hidden space-y-6">
       <div class="bright-card rounded-3xl p-5 space-y-4">
         
@@ -374,7 +374,7 @@
 
           <div class="flex items-center gap-2 flex-wrap">
             <button onclick="togglePrivacyMask()" id="maskToggleBtn" class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-2xl border border-slate-200 shadow-sm transition flex items-center gap-1.5">
-              <i data-lucide="eye-off" class="w-4 h-4"></i> 隱私遮蔽：開啟
+              <i data-lucide="eye-off" class="w-4 h-4"></i> 隱私遮蔽：關閉
             </button>
 
             <button onclick="exportWinnersCSV()" id="exportCsvBtn" disabled class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold rounded-2xl transition shadow-md shadow-emerald-500/20 flex items-center gap-1.5">
@@ -442,28 +442,6 @@
     </div>
   </div>
 
-  <div id="pasteModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-100 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <i data-lucide="clipboard-type" class="w-5 h-5 text-brand-500"></i> 貼上表格或 CSV 文字資料
-        </h3>
-        <button onclick="closePasteModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <p class="text-xs text-slate-500">您可以直接從 Excel、Google Sheets 或記事本複製資料並貼在下方（每行一筆，欄位以逗號或 Tab 分隔）：</p>
-
-      <textarea id="pasteInputText" rows="7" placeholder="姓名, Email, 電話&#10;張小明, ming@example.com, 0912345678&#10;李小華, hua@example.com, 0987654321" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs font-mono text-slate-800 focus:outline-none focus:border-brand-500 custom-scrollbar"></textarea>
-
-      <div class="flex items-center justify-end gap-2 pt-2">
-        <button onclick="closePasteModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">取消</button>
-        <button onclick="submitPastedData()" class="px-4 py-2 bg-gradient-to-r from-brand-500 to-vibrant-orange hover:from-brand-600 hover:to-vibrant-orange text-white text-xs font-bold rounded-xl transition shadow-md shadow-brand-500/20">確定匯入</button>
-      </div>
-    </div>
-  </div>
-
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script type="module">
@@ -489,7 +467,7 @@
     const firebaseConfig = typeof __firebase_config !== 'undefined'
       ? JSON.parse(__firebase_config)
       : {
-          apiKey: "AIzaSy_YOUR_FIREBASE_API_KEY_HERE", 
+          apiKey: "AIzaSyAeR79pFgwTfyPjPZOgAuRetxgcJ22cago", 
           authDomain: "survey-raffle-system.firebaseapp.com",
           projectId: "survey-raffle-system",
           storageBucket: "survey-raffle-system.appspot.com",
@@ -510,6 +488,7 @@
     window.rawData = [];
     window.eligiblePool = [];
     window.winnersList = [];
+    window.lastParsedDedupeStats = { rawCount: 0, dedupeCount: 0 };
     window.prizes = [
       { id: 'p1', name: '頭獎 (MacBook Pro)', quota: 1, icon: 'laptop' },
       { id: 'p2', name: '二獎 (iPad Air)', quota: 2, icon: 'tablet' },
@@ -629,12 +608,13 @@
       });
 
       await batch.commit();
-      showToast(`已成功同步 ${parsedItems.length} 筆資料至雲端！`, 'success');
+      showToast(`已成功同步 ${parsedItems.length} 筆不重複資料至雲端！`, 'success');
     };
 
     window.clearParticipantsFromCloud = async function() {
       if (!currentUser) {
         window.rawData = [];
+        window.lastParsedDedupeStats = { rawCount: 0, dedupeCount: 0 };
         applyDeduplication();
         return;
       }
@@ -643,7 +623,8 @@
       const batch = writeBatch(db);
       snapshot.forEach(docSnap => batch.delete(docSnap.ref));
       await batch.commit();
-      showToast('已清空雲端抽獎名單', 'info');
+      window.lastParsedDedupeStats = { rawCount: 0, dedupeCount: 0 };
+      showToast('已清空參加者名單', 'info');
     };
 
     window.savePrizeToCloud = async function(prizeObj) {
@@ -687,7 +668,7 @@
   </script>
 
   <script>
-    let isPrivacyMasked = true;
+    let isPrivacyMasked = false; // 預設關閉隱私遮蔽，方便清楚核對名單
     let isDrawingRunning = false;
     let audioCtx = null;
 
@@ -743,20 +724,30 @@
       event.target.value = '';
     }
 
+    function submitDirectText() {
+      const text = document.getElementById('directPasteText').value;
+      if (!text || !text.trim()) {
+        showToast('請先輸入或貼上文字資料！', 'error');
+        return;
+      }
+      processCSVText(text);
+    }
+
+    // 解析文字並在「寫入雲端前」強制執行去重
     function processCSVText(csvText) {
       if (!csvText || !csvText.trim()) {
-        showToast('CSV 檔案內容為空！', 'error');
+        showToast('文字內容為空！', 'error');
         return;
       }
 
       const lines = csvText.split(/\r\n|\n|\r/).map(line => line.trim()).filter(line => line !== '');
       if (lines.length === 0) {
-        showToast('CSV 檔案內無任何資料！', 'error');
+        showToast('無任何有效資料！', 'error');
         return;
       }
 
       const firstLine = lines[0];
-      const delimiter = firstLine.includes('\t') ? '\t' : ',';
+      const delimiter = firstLine.includes('\t') ? '\t' : (firstLine.includes(',') ? ',' : ' ');
       
       const splitRow = (row) => splitCSVRow(row, delimiter);
       const headers = splitRow(firstLine.toLowerCase());
@@ -769,57 +760,109 @@
 
       if (nameIdx === -1 && emailIdx === -1 && phoneIdx === -1) {
         startRow = 0;
-        const sampleCols = splitRow(lines[0]);
-        sampleCols.forEach((col, idx) => {
-          if (col.includes('@') && emailIdx === -1) emailIdx = idx;
-          else if (/[\d-]{7,}/.test(col) && phoneIdx === -1) phoneIdx = idx;
-          else if (nameIdx === -1) nameIdx = idx;
-        });
       }
 
-      let parsed = [];
+      let rawParsedList = [];
       const batchTag = Date.now().toString(36);
 
       for (let i = startRow; i < lines.length; i++) {
         const cols = splitRow(lines[i]);
         if (cols.length === 0 || cols.every(c => !c)) continue;
 
-        let name = nameIdx !== -1 && cols[nameIdx] ? cols[nameIdx].trim() : '';
-        let email = emailIdx !== -1 && cols[emailIdx] ? cols[emailIdx].trim() : '';
-        let phone = phoneIdx !== -1 && cols[phoneIdx] ? cols[phoneIdx].trim() : '';
+        let name = '';
+        let email = '';
+        let phone = '';
 
-        if (!email) {
-          const foundEmail = cols.find(c => c.includes('@'));
-          if (foundEmail) email = foundEmail.trim();
+        if (startRow === 1) {
+          name = nameIdx !== -1 && cols[nameIdx] ? cols[nameIdx].trim() : '';
+          email = emailIdx !== -1 && cols[emailIdx] ? cols[emailIdx].trim() : '';
+          phone = phoneIdx !== -1 && cols[phoneIdx] ? cols[phoneIdx].trim() : '';
         }
-        if (!phone) {
-          const foundPhone = cols.find(c => /^09[\d\s-]{8,}$/.test(c.trim()) || /^[\d\s-]{7,12}$/.test(c.trim()));
-          if (foundPhone) phone = foundPhone.trim();
-        }
-        if (!name && cols.length > 0) {
-          const foundName = cols.find(c => c !== email && c !== phone && c.length > 0);
-          if (foundName) name = foundName.trim();
-        }
+
+        // 自動智慧判斷欄位 (當無 Header 或 header 找不到時)
+        cols.forEach(c => {
+          const val = c.trim();
+          if (!val) return;
+          if (val.includes('@') && !email) {
+            email = val;
+          } else if (/^09[\d-]{8,}$/.test(val) || /^[\d-]{7,12}$/.test(val)) {
+            if (!phone) phone = val;
+          } else {
+            if (!name) name = val;
+          }
+        });
 
         if (name || email || phone) {
-          parsed.push({
+          rawParsedList.push({
             id: `u_${batchTag}_${i}_` + Math.random().toString(36).substr(2, 6),
-            name: name || '未提供姓名',
+            name: name || email || phone || '未提供姓名',
             email: email || '',
             phone: phone || ''
           });
         }
       }
 
-      if (parsed.length === 0) {
-        showToast('無法辨識有效的資料欄位，請檢查檔案格式！', 'error');
+      if (rawParsedList.length === 0) {
+        showToast('無法辨識有效的資料，請檢查格式！', 'error');
         return;
       }
 
-      window.saveParticipantsToCloud(parsed);
+      // 【核心去重邏輯】匯入寫入雲端前強制過濾重複：相同 Email、姓名、或電話僅保留第一筆
+      const seenEmails = new Set();
+      const seenNames = new Set();
+      const seenPhones = new Set();
+
+      // 現有已存於雲端/記憶體中的歷史識別碼
+      (window.rawData || []).forEach(existing => {
+        if (existing.email) seenEmails.add(existing.email.trim().toLowerCase());
+        if (existing.name && existing.name !== '未提供姓名') seenNames.add(existing.name.trim().replace(/\s+/g, ''));
+        if (existing.phone) seenPhones.add(existing.phone.trim().replace(/[\s-]/g, ''));
+      });
+
+      const uniqueParsedItems = [];
+      let deduplicatedCount = 0;
+
+      rawParsedList.forEach(item => {
+        const emailKey = item.email ? item.email.trim().toLowerCase() : '';
+        const nameKey = item.name ? item.name.trim().replace(/\s+/g, '') : '';
+        const phoneKey = item.phone ? item.phone.trim().replace(/[\s-]/g, '') : '';
+
+        let isDuplicate = false;
+
+        if (emailKey && seenEmails.has(emailKey)) isDuplicate = true;
+        if (nameKey && nameKey !== '未提供姓名' && seenNames.has(nameKey)) isDuplicate = true;
+        if (phoneKey && seenPhones.has(phoneKey)) isDuplicate = true;
+
+        if (isDuplicate) {
+          deduplicatedCount++;
+        } else {
+          if (emailKey) seenEmails.add(emailKey);
+          if (nameKey && nameKey !== '未提供姓名') seenNames.add(nameKey);
+          if (phoneKey) seenPhones.add(phoneKey);
+          uniqueParsedItems.push(item);
+        }
+      });
+
+      // 紀錄此次匯入剔除數量
+      window.lastParsedDedupeStats = {
+        rawCount: rawParsedList.length,
+        dedupeCount: deduplicatedCount
+      };
+
+      if (uniqueParsedItems.length === 0) {
+        showToast(`匯入的 ${rawParsedList.length} 筆資料全部與已有名單重複，已自動跳過！`, 'info');
+        return;
+      }
+
+      // 組合現有與新新增的唯一資料並存至雲端
+      const combinedList = [...(window.rawData || []), ...uniqueParsedItems];
+      window.saveParticipantsToCloud(combinedList);
     }
 
     function splitCSVRow(rowText, delimiter = ',') {
+      if (delimiter === ' ') {
+        return rowText.trim().split(/\s+/);
+      }
       const result = [];
       let current = '';
       let inQuotes = false;
@@ -838,37 +881,11 @@
       return result;
     }
 
-    // 核心去重邏輯：自動刪除相同的 E-mail 或 姓名，僅留下未重複的名單
+    // 即時維護合格抽獎池 (剔除已中獎者)
     function applyDeduplication() {
-      const seenEmails = new Set();
-      const seenNames = new Set();
-      const uniquePool = [];
-
-      (window.rawData || []).forEach(item => {
-        const emailKey = item.email ? item.email.trim().toLowerCase() : '';
-        const nameKey = item.name ? item.name.trim().replace(/\s+/g, '') : '';
-
-        let isDuplicate = false;
-
-        // 當 Email 相同時，判定為重複
-        if (emailKey && seenEmails.has(emailKey)) {
-          isDuplicate = true;
-        }
-        // 當 姓名 相同時，判定為重複
-        if (nameKey && nameKey !== '未提供姓名' && seenNames.has(nameKey)) {
-          isDuplicate = true;
-        }
-
-        // 僅保留第一筆未重複資料
-        if (!isDuplicate) {
-          if (emailKey) seenEmails.add(emailKey);
-          if (nameKey && nameKey !== '未提供姓名') seenNames.add(nameKey);
-          uniquePool.push(item);
-        }
-      });
-
       const winnerIds = new Set((window.winnersList || []).map(w => w.id));
-      window.eligiblePool = uniquePool.filter(user => !winnerIds.has(user.id));
+      // 因為 window.rawData 已經是經過嚴格不重複過濾的名單，直接排除中獎者即可
+      window.eligiblePool = (window.rawData || []).filter(user => !winnerIds.has(user.id));
 
       updateStats();
       renderImportTable();
@@ -900,27 +917,8 @@
       window.saveParticipantsToCloud(mock);
     }
 
-    function openPasteModal() {
-      document.getElementById('pasteInputText').value = '';
-      document.getElementById('pasteModal').classList.remove('hidden');
-    }
-
-    function closePasteModal() {
-      document.getElementById('pasteModal').classList.add('hidden');
-    }
-
-    function submitPastedData() {
-      const text = document.getElementById('pasteInputText').value;
-      if (!text || !text.trim()) {
-        showToast('請先貼上資料文字！', 'error');
-        return;
-      }
-      closePasteModal();
-      processCSVText(text);
-    }
-
     function clearImportedData() {
-      showModal('確認清空雲端名單', '確定要清空雲端資料庫的名單嗎？所有連線中的使用者將同步更新。', () => {
+      showModal('確認清空參加者名單', '確定要清空雲端資料庫的名單嗎？所有連線中的使用者將同步更新。', () => {
         window.clearParticipantsFromCloud();
       });
     }
@@ -929,7 +927,7 @@
       const rawCount = (window.rawData || []).length;
       const validCount = (window.eligiblePool || []).length;
       const winnersCount = (window.winnersList || []).length;
-      const dedupeCount = Math.max(0, rawCount - (validCount + winnersCount));
+      const dedupeCount = window.lastParsedDedupeStats ? window.lastParsedDedupeStats.dedupeCount : 0;
 
       document.getElementById('statRawCount').innerText = rawCount;
       document.getElementById('statDedupeCount').innerText = dedupeCount;
@@ -943,9 +941,9 @@
 
       const summaryText = document.getElementById('dataSummaryText');
       if (rawCount > 0) {
-        summaryText.innerText = `雲端共有 ${rawCount} 筆資料，剔除重複 E-mail / 姓名後，共有 ${validCount} 人具備抽獎資格。`;
+        summaryText.innerText = `雲端共有 ${rawCount} 筆唯一資料，目前共有 ${validCount} 人具備抽獎資格。`;
       } else {
-        summaryText.innerText = '尚未匯入資料，請選擇 CSV 檔案或使用測試資料。';
+        summaryText.innerText = '尚未匯入資料，請選擇 CSV 檔案、貼上文字或使用測試資料。';
       }
 
       const eligibleCountText = document.getElementById('prizeEligibleCountText');
@@ -969,38 +967,21 @@
       }
 
       const winnersSet = new Set((window.winnersList || []).map(w => w.id));
-      const seenEmails = new Set();
-      const seenNames = new Set();
 
-      tbody.innerHTML = raw.slice(0, 100).map((row, idx) => {
-        const emailKey = row.email ? row.email.trim().toLowerCase() : '';
-        const nameKey = row.name ? row.name.trim().replace(/\s+/g, '') : '';
-
-        let isDuplicate = false;
-        if (emailKey && seenEmails.has(emailKey)) {
-          isDuplicate = true;
-        }
-        if (nameKey && nameKey !== '未提供姓名' && seenNames.has(nameKey)) {
-          isDuplicate = true;
-        }
-
+      tbody.innerHTML = raw.map((row, idx) => {
         let statusBadge = '';
         if (winnersSet.has(row.id)) {
           statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-700 font-bold border border-amber-200">已中獎</span>';
-        } else if (isDuplicate) {
-          statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] bg-rose-100 text-brand-700 font-bold border border-rose-200">重複刪除</span>';
         } else {
-          if (emailKey) seenEmails.add(emailKey);
-          if (nameKey && nameKey !== '未提供姓名') seenNames.add(nameKey);
           statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-700 font-bold border border-emerald-200">合格參抽</span>';
         }
 
         return `
           <tr class="hover:bg-rose-50/40">
             <td class="py-2.5 px-3 text-slate-400 font-mono">${idx + 1}</td>
-            <td class="py-2.5 px-3 font-semibold text-slate-800">${escapeHtml(row.name)}</td>
-            <td class="py-2.5 px-3 text-slate-600">${row.email ? maskString(row.email, 'email') : '<span class="text-slate-400">無</span>'}</td>
-            <td class="py-2.5 px-3 text-slate-600 font-mono">${row.phone ? maskString(row.phone, 'phone') : '<span class="text-slate-400">無</span>'}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-800">${escapeHtml(maskString(row.name))}</td>
+            <td class="py-2.5 px-3 text-slate-600 font-mono">${row.email ? escapeHtml(maskString(row.email, 'email')) : '<span class="text-slate-300">無</span>'}</td>
+            <td class="py-2.5 px-3 text-slate-600 font-mono">${row.phone ? escapeHtml(maskString(row.phone, 'phone')) : '<span class="text-slate-300">無</span>'}</td>
             <td class="py-2.5 px-3 text-right">${statusBadge}</td>
           </tr>
         `;
@@ -1481,3 +1462,9 @@
   </script>
 </body>
 </html>
+```
+
+### 本次修正重點：
+1. **寫入雲端前強制去重**：不論是上傳 CSV、貼上多欄還是單欄文字，系統會在處理資料時即時比對姓名、Email 與電話。若有重複，直接在寫入資料庫前丟棄重複項目，確保寫進 Firebase 的一定是唯一資料。
+2. **修正預覽表格與計數**：現在雲端名單表格只會展示經過驗證的不重複名單，不會再出現兩筆一模一樣的「陳小美 BB@456.com 546123」；「已剔除重複筆數」也會精準統計每次匯入時過濾掉了多少筆重複數據。
+3. **預設開放名單明細**：預設關閉隱私遮蔽（或可隨時開關），方便匯入後第一時間進行名單核對。
