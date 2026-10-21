@@ -494,6 +494,7 @@
     let prizesColRef = null;
     let winnersColRef = null;
     let stageStateRef = null;
+    let hasStageSync = false;
 
     // 本機備援儲存：Firebase 無法使用時保留目前瀏覽器的資料。
     const localStoreEngine = {
@@ -520,6 +521,7 @@
 
       const styles = {
         online: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        pending: 'bg-amber-50 text-amber-700 border-amber-200',
         local: 'bg-amber-50 text-amber-700 border-amber-200',
         error: 'bg-rose-50 text-rose-700 border-rose-200'
       };
@@ -556,7 +558,7 @@
           setupPrizesListener();
           setupWinnersListener();
           setupStageListener();
-          setSyncStatus('online', '🟢 雲端同步中');
+          setSyncStatus('pending', '🟡 正在連接舞台同步');
         } else {
           throw new Error('找不到 Firebase 設定');
         }
@@ -653,6 +655,7 @@
       if (!stageStateRef) return;
       try {
         await setDoc(stageStateRef, { ...state, updatedAt: Date.now() }, { merge: true });
+        if (!hasStageSync) setSyncStatus('pending', '🟡 正在確認舞台同步');
       } catch (error) {
         console.error('舞台狀態同步失敗：', error);
         setSyncStatus('error', '🔴 舞台同步失敗');
@@ -662,6 +665,8 @@
     function setupStageListener() {
       if (!stageStateRef) return;
       onSnapshot(stageStateRef, (snapshot) => {
+        hasStageSync = true;
+        setSyncStatus('online', '🟢 舞台同步已連線');
         if (!snapshot.exists()) return;
         const state = snapshot.data();
         if (state.activeTab) window.switchTab?.(state.activeTab, false);
