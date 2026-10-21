@@ -96,7 +96,7 @@
       <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
         <div id="syncStatusBadge" class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 font-medium">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span class="hidden sm:inline">狀態:</span> <span id="syncStatusText">🟢 雲端同步中</span>
+          <span class="hidden sm:inline">狀態:</span> <span id="syncStatusText">正在檢查連線...</span>
         </div>
 
         <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100/80">
@@ -315,7 +315,7 @@
           
           <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
             <label class="text-xs text-white/90 font-medium shrink-0">目前抽取獎項：</label>
-            <select id="stagePrizeSelect" onchange="handleStagePrizeChange()" class="w-full sm:w-auto bg-white text-slate-800 font-bold text-base sm:text-lg rounded-2xl px-4 py-2 focus:outline-none shadow-md">
+            <select id="stagePrizeSelect" onchange="handleStagePrizeChange(true)" class="w-full sm:w-auto bg-white text-slate-800 font-bold text-base sm:text-lg rounded-2xl px-4 py-2 focus:outline-none shadow-md">
             </select>
           </div>
           <p id="stagePrizeProgress" class="text-xs text-white/90 font-medium">剩餘名額：<span class="text-yellow-200 font-bold">0</span> 名</p>
@@ -468,7 +468,14 @@
       getDocs
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const appId = 'survey-raffle-system';
+    const defaultFirebaseConfig = {
+      apiKey: 'AIzaSyAeR79pFgwTfyPjPZOgAuRetxgcJ22cago',
+      authDomain: 'survey-raffle-system.firebaseapp.com',
+      projectId: 'survey-raffle-system',
+      storageBucket: 'survey-raffle-system.appspot.com',
+      messagingSenderId: '590171246481',
+      appId: '1:590171246481:web:42ea2582b49d2efb7c1430'
+    };
 
     window.rawData = [];
     window.eligiblePool = [];
@@ -486,8 +493,9 @@
     let participantsColRef = null;
     let prizesColRef = null;
     let winnersColRef = null;
+    let stageStateRef = null;
 
-    // 定義強健的本地儲存同步器 (Local Cloud Sync Engine)，確保狀態始終恆定為「雲端同步」
+    // 本機備援儲存：Firebase 無法使用時保留目前瀏覽器的資料。
     const localStoreEngine = {
       get(key, defaultVal) {
         try {
@@ -504,19 +512,25 @@
       }
     };
 
-    async function initCloudSync() {
+    function setSyncStatus(status, message) {
       const statusBadge = document.getElementById('syncStatusBadge');
       const statusText = document.getElementById('syncStatusText');
 
-      const updateBadgeToOnline = () => {
-        if (statusBadge && statusText) {
-          statusBadge.className = "flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 font-medium";
-          statusText.innerText = "🟢 雲端同步中";
-        }
+      if (!statusBadge || !statusText) return;
+
+      const styles = {
+        online: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        local: 'bg-amber-50 text-amber-700 border-amber-200',
+        error: 'bg-rose-50 text-rose-700 border-rose-200'
       };
+      statusBadge.className = `flex items-center gap-2 px-3 py-1.5 rounded-xl border font-medium ${styles[status] || styles.error}`;
+      statusText.innerText = message;
+    }
+
+    async function initCloudSync() {
 
       try {
-        let firebaseConfig = null;
+        let firebaseConfig = defaultFirebaseConfig;
         if (typeof __firebase_config !== 'undefined') {
           firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
         }
@@ -533,42 +547,59 @@
           }
           currentUser = auth.currentUser;
 
-          participantsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
-          prizesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'prizes');
-          winnersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'winners');
+          participantsColRef = collection(db, 'participants');
+          prizesColRef = collection(db, 'prizes');
+          winnersColRef = collection(db, 'winners');
+          stageStateRef = doc(db, 'systemState', 'currentStage');
 
           setupParticipantsListener();
           setupPrizesListener();
           setupWinnersListener();
+          setupStageListener();
+          setSyncStatus('online', '🟢 雲端同步中');
         } else {
-          throw new Error("使用標準內置雲端同步機制");
+          throw new Error('找不到 Firebase 設定');
         }
       } catch (err) {
-        // 當無 Firebase 外部 Key 時，啟用本地模擬雲端資料庫（不顯示展示模式警告）
+        console.warn('Firebase 同步未啟用：', err);
         setupLocalVirtualCloud();
+        setSyncStatus('error', '🔴 雲端連線失敗，使用本機資料');
       }
-
-      updateBadgeToOnline();
     }
 
     function setupLocalVirtualCloud() {
       window.rawData = localStoreEngine.get('participants', []);
-      window.prizes = localStoreEngine.get('prizes', window.prizes);
-      window.winnersList = localStoreEngine.get('winners', []);
+      window.prizes = localStoreEngine.get('prizes', window.prizes).map(normalizePrize);
+      window.winnersList = localStoreEngine.get('winners', []).map(normalizeWinner);
       applyDeduplication();
       renderPrizeList();
       updateStagePrizeOptions();
+    }
+
+    function normalizePrize(prize) {
+      return {
+        ...prize,
+        quota: Number(prize.quota ?? prize.count ?? 1)
+      };
+    }
+
+    function normalizeWinner(winner) {
+      return {
+        ...winner,
+        drawnAt: winner.drawnAt || winner.timestamp || ''
+      };
     }
 
     function setupParticipantsListener() {
       if (!db || !participantsColRef) return;
       onSnapshot(participantsColRef, (snapshot) => {
         const list = [];
-        snapshot.forEach(docSnap => list.push(docSnap.data()));
+        snapshot.forEach(docSnap => list.push({ id: docSnap.id, ...docSnap.data() }));
         window.rawData = list;
         applyDeduplication();
       }, (err) => {
         console.warn("Participants sync notice:", err);
+        setSyncStatus('error', '🔴 名單同步失敗');
       });
     }
 
@@ -580,13 +611,14 @@
           return;
         }
         const list = [];
-        snapshot.forEach(docSnap => list.push(docSnap.data()));
+        snapshot.forEach(docSnap => list.push(normalizePrize({ id: docSnap.id, ...docSnap.data() })));
         list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
         window.prizes = list;
         renderPrizeList();
         updateStagePrizeOptions();
       }, (err) => {
         console.warn("Prizes sync notice:", err);
+        setSyncStatus('error', '🔴 獎項同步失敗');
       });
     }
 
@@ -604,7 +636,7 @@
       if (!db || !winnersColRef) return;
       onSnapshot(winnersColRef, (snapshot) => {
         const list = [];
-        snapshot.forEach(docSnap => list.push(docSnap.data()));
+        snapshot.forEach(docSnap => list.push(normalizeWinner({ id: docSnap.id, ...docSnap.data() })));
         list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
         window.winnersList = list;
@@ -613,6 +645,37 @@
         updateStagePrizeOptions();
       }, (err) => {
         console.warn("Winners sync notice:", err);
+        setSyncStatus('error', '🔴 中獎名單同步失敗');
+      });
+    }
+
+    window.setStageState = async function(state) {
+      if (!stageStateRef) return;
+      try {
+        await setDoc(stageStateRef, { ...state, updatedAt: Date.now() }, { merge: true });
+      } catch (error) {
+        console.error('舞台狀態同步失敗：', error);
+        setSyncStatus('error', '🔴 舞台同步失敗');
+      }
+    };
+
+    function setupStageListener() {
+      if (!stageStateRef) return;
+      onSnapshot(stageStateRef, (snapshot) => {
+        if (!snapshot.exists()) return;
+        const state = snapshot.data();
+        if (state.activeTab) window.switchTab?.(state.activeTab, false);
+        if (state.selectedPrizeId) {
+          const select = document.getElementById('stagePrizeSelect');
+          if (select && select.value !== state.selectedPrizeId) {
+            select.value = state.selectedPrizeId;
+            window.handleStagePrizeChange?.(false);
+          }
+        }
+        window.applySharedStageState?.(state);
+      }, (error) => {
+        console.error('舞台狀態監聽失敗：', error);
+        setSyncStatus('error', '🔴 舞台同步失敗');
       });
     }
 
@@ -631,10 +694,13 @@
           });
           await batch.commit();
         } catch (e) {
-          console.warn('Sync batch written via Virtual Cloud Engine');
+          console.error('參加者名單寫入失敗：', e);
+          setSyncStatus('error', '🔴 名單寫入失敗');
+          showToast('雲端名單寫入失敗，請檢查 Firebase 權限。', 'error');
+          return;
         }
       }
-      showToast(`已成功同步 ${parsedItems.length} 筆不重複資料至雲端！`, 'success');
+      showToast(db ? `已成功同步 ${parsedItems.length} 筆不重複資料至雲端！` : `已儲存 ${parsedItems.length} 筆本機資料。`, 'success');
     };
 
     window.clearParticipantsFromCloud = async function() {
@@ -649,7 +715,10 @@
           const batch = writeBatch(db);
           snapshot.forEach(docSnap => batch.delete(docSnap.ref));
           await batch.commit();
-        } catch (e) {}
+        } catch (e) {
+          console.error('參加者名單清除失敗：', e);
+          setSyncStatus('error', '🔴 名單清除失敗');
+        }
       }
       showToast('已清空參加者名單', 'info');
     };
@@ -668,8 +737,12 @@
       if (db && prizesColRef) {
         try {
           const docRef = doc(prizesColRef, prizeObj.id);
-          await setDoc(docRef, { ...prizeObj, createdAt: prizeObj.createdAt || Date.now() });
-        } catch (e) {}
+          await setDoc(docRef, { ...prizeObj, count: prizeObj.quota, createdAt: prizeObj.createdAt || Date.now() });
+        } catch (e) {
+          console.error('獎項寫入失敗：', e);
+          setSyncStatus('error', '🔴 獎項寫入失敗');
+          showToast('雲端獎項寫入失敗，請檢查 Firebase 權限。', 'error');
+        }
       }
     };
 
@@ -696,7 +769,11 @@
         try {
           const docRef = doc(winnersColRef, winnerRecord.id);
           await setDoc(docRef, { ...winnerRecord, timestamp: Date.now() });
-        } catch (e) {}
+        } catch (e) {
+          console.error('中獎紀錄寫入失敗：', e);
+          setSyncStatus('error', '🔴 中獎紀錄寫入失敗');
+          showToast('雲端中獎紀錄寫入失敗，請檢查 Firebase 權限。', 'error');
+        }
       }
     };
 
@@ -734,7 +811,7 @@
       updateStats();
     });
 
-    function switchTab(tabKey) {
+    function switchTab(tabKey, shouldSync = true) {
       const tabs = ['import', 'prizes', 'draw', 'results'];
       tabs.forEach(key => {
         const btn = document.getElementById(`tab-${key}`);
@@ -756,6 +833,7 @@
         checkStageStatus();
       }
       if (tabKey === 'results') renderResultsTable();
+      if (shouldSync && window.setStageState) window.setStageState({ activeTab: tabKey });
     }
 
     function handleFileSelect(event) {
@@ -1127,7 +1205,7 @@
       handleStagePrizeChange();
     }
 
-    function handleStagePrizeChange() {
+    function handleStagePrizeChange(shouldSync = false) {
       const select = document.getElementById('stagePrizeSelect');
       if (!select) return;
 
@@ -1146,6 +1224,9 @@
       `;
 
       checkStageStatus();
+      if (shouldSync && window.setStageState) {
+        window.setStageState({ activeTab: 'draw', selectedPrizeId: prizeId, status: 'idle' });
+      }
     }
 
     function checkStageStatus() {
@@ -1171,7 +1252,7 @@
       drawAllBtn.disabled = remaining === 0;
     }
 
-    function triggerDraw(countToDraw = 1) {
+    async function triggerDraw(countToDraw = 1) {
       if (isDrawingRunning || (window.eligiblePool || []).length === 0) return;
 
       const select = document.getElementById('stagePrizeSelect');
@@ -1184,6 +1265,10 @@
       if (remaining === 0) {
         showToast('該獎項名額已全數抽出！', 'error');
         return;
+      }
+
+      if (window.setStageState) {
+        await window.setStageState({ activeTab: 'draw', selectedPrizeId: prize.id, status: 'drawing' });
       }
 
       isDrawingRunning = true;
@@ -1278,11 +1363,24 @@
         const w = drawnWinners[0];
         tickerSubLabel.innerText = `🎉 恭喜中獎！ [ ${prize.name} ]`;
         tickerName.innerText = w.name;
-        tickerDetail.innerText = `Email: ${w.email || '無'} | 電話: ${w.phone || '無'}`;
+        tickerDetail.innerText = getWinnerDetail(w);
       } else {
         tickerSubLabel.innerText = `🎉 批量開獎完成！ [ ${prize.name} ]`;
         tickerName.innerText = `共抽出 ${drawnWinners.length} 位中獎者`;
         tickerDetail.innerText = `請至「中獎紀錄」分頁查看完整的名單紀錄`;
+      }
+
+      if (window.setStageState) {
+        const singleWinner = drawnWinners.length === 1 ? drawnWinners[0] : null;
+        await window.setStageState({
+          activeTab: 'draw',
+          selectedPrizeId: prize.id,
+          status: 'completed',
+          winnerCount: drawnWinners.length,
+          winnerName: singleWinner ? singleWinner.name : '',
+          winnerDetail: singleWinner ? getWinnerDetail(singleWinner) : '請至「中獎紀錄」分頁查看完整的名單紀錄',
+          prizeName: prize.name
+        });
       }
 
       playFanfareSound();
@@ -1299,6 +1397,30 @@
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
     }
+
+    function getWinnerDetail(winner) {
+      const details = [];
+      if (winner.email && winner.email !== winner.name) details.push(`Email: ${winner.email}`);
+      if (winner.phone && winner.phone !== winner.name) details.push(`電話: ${winner.phone}`);
+      return details.join(' | ') || '幸運中獎者！';
+    }
+
+    window.applySharedStageState = function(state) {
+      const tickerSubLabel = document.getElementById('tickerSubLabel');
+      const tickerName = document.getElementById('tickerName');
+      const tickerDetail = document.getElementById('tickerDetail');
+      if (!tickerSubLabel || !tickerName || !tickerDetail) return;
+
+      if (state.status === 'drawing') {
+        tickerSubLabel.innerText = 'DRAWING...';
+        tickerName.innerText = '抽獎進行中';
+        tickerDetail.innerText = '正在同步開獎舞台';
+      } else if (state.status === 'completed') {
+        tickerSubLabel.innerText = `🎉 恭喜中獎！ [ ${state.prizeName || ''} ]`;
+        tickerName.innerText = state.winnerCount === 1 ? state.winnerName : `共抽出 ${state.winnerCount} 位中獎者`;
+        tickerDetail.innerText = state.winnerDetail || '';
+      }
+    };
 
     function maskString(str, type = 'auto') {
       if (!str) return '';
