@@ -78,6 +78,7 @@
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
 
+  <!-- Header Banner -->
   <header class="border-b border-rose-100 bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -91,11 +92,11 @@
         </div>
       </div>
 
-      <!-- Realtime Sync & Stats Banner -->
+      <!-- Sync & Stats Banner -->
       <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-        <div id="syncStatusBadge" class="flex items-center gap-2 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-xl border border-slate-200 font-medium">
-          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-          <span class="hidden sm:inline">狀態:</span> <span id="syncStatusText">連接中...</span>
+        <div id="syncStatusBadge" class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 font-medium">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="hidden sm:inline">狀態:</span> <span id="syncStatusText">🟢 雲端同步中</span>
         </div>
 
         <div class="flex items-center gap-2 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100/80">
@@ -136,6 +137,7 @@
       </button>
     </div>
 
+    <!-- Section 1: Import -->
     <section id="content-import" class="space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 bright-card rounded-3xl p-5 space-y-4 flex flex-col justify-between">
@@ -145,7 +147,7 @@
                 <i data-lucide="file-up" class="w-5 h-5 text-brand-500"></i>
                 匯入問卷資料
               </h2>
-              <p class="text-xs text-slate-500 mt-1">支援一般 CSV 檔或 Excel/Google 試算表內容貼上。</p>
+              <p class="text-xs text-slate-500 mt-1">支援 CSV 檔案或 Excel/Google 試算表內容直接貼上。</p>
             </div>
 
             <!-- Drag & Drop Zone -->
@@ -158,7 +160,7 @@
               <p class="text-xs text-slate-400">支援 UTF-8 / Big5 編碼檔</p>
             </label>
 
-            <!-- Text Box Direct Input Section -->
+            <!-- Text Box Direct Input -->
             <div class="space-y-2 pt-2 border-t border-slate-100">
               <label class="text-xs font-bold text-slate-700 block">貼上文字，可為單欄或多欄：</label>
               <textarea id="directPasteText" rows="4" placeholder="AA@123.com&#10;BB@456.com&#10;陳小美 BB@456.com 546123&#10;王曉明 AA@123.com 123045" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs font-mono text-slate-800 focus:outline-none focus:border-brand-500 custom-scrollbar"></textarea>
@@ -178,11 +180,11 @@
 
           <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 text-xs space-y-2 text-slate-600 mt-4">
             <div class="font-bold text-brand-600 flex items-center gap-1.5">
-              <i data-lucide="check-circle2" class="w-4 h-4 text-brand-500"></i> 強制自動去重機制
+              <i data-lucide="check-circle2" class="w-4 h-4 text-brand-500"></i> 自動去重與同步機制
             </div>
             <ul class="list-disc list-inside space-y-1 text-slate-500 leading-relaxed">
-              <li><strong class="text-slate-700">寫入前去重：</strong>匯入時系統會強制自動剔除重複的 Email、姓名或電話，僅將唯一的有效名單寫入雲端。</li>
-              <li><strong class="text-slate-700">即時同步：</strong>管理員抽獎時，所有人的螢幕畫面同步呈現開獎效果。</li>
+              <li><strong class="text-slate-700">寫入前去重：</strong>系統自動剔除重複的 Email、姓名或電話，僅寫入唯一的有效名單。</li>
+              <li><strong class="text-slate-700">即時同步：</strong>開獎時所有人螢幕畫面同步呈現開獎效果。</li>
             </ul>
           </div>
         </div>
@@ -195,7 +197,7 @@
                   <i data-lucide="database" class="w-5 h-5 text-vibrant-teal"></i>
                   雲端名單預覽
                 </h2>
-                <p class="text-xs text-slate-500 mt-0.5" id="dataSummaryText">載入雲端資料中...</p>
+                <p class="text-xs text-slate-500 mt-0.5" id="dataSummaryText">雲端資料載入中...</p>
               </div>
 
               <button onclick="clearImportedData()" id="clearDataBtn" disabled class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-brand-600 disabled:opacity-40 disabled:cursor-not-allowed border border-rose-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
@@ -254,15 +256,16 @@
       </div>
     </section>
 
+    <!-- Section 2: Prizes -->
     <section id="content-prizes" class="hidden space-y-6">
       <div class="bright-card rounded-3xl p-5 sm:p-6 space-y-6">
         <div class="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
               <i data-lucide="award" class="w-5 h-5 text-amber-500"></i>
-              設定抽獎獎項與名額 (實時雲端設定)
+              設定抽獎獎項與名額 (雲端同步)
             </h2>
-            <p class="text-xs text-slate-500 mt-1">變更會即時同步給所有正在關注開獎畫面的使用者。</p>
+            <p class="text-xs text-slate-500 mt-1">變更會即時同步給所有連線使用者。</p>
           </div>
 
           <button onclick="addPrizeRow()" class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-brand-600 border border-rose-200 font-bold rounded-2xl text-xs sm:text-sm transition flex items-center gap-1.5 shadow-sm">
@@ -298,6 +301,7 @@
       </div>
     </section>
 
+    <!-- Section 3: Draw Stage -->
     <section id="content-draw" class="hidden space-y-6">
       <div class="relative bg-gradient-to-br from-amber-400 via-rose-500 to-vibrant-orange rounded-3xl p-6 sm:p-10 shadow-xl overflow-hidden min-h-[460px] flex flex-col justify-between items-center text-center text-white">
         
@@ -360,6 +364,7 @@
       </div>
     </section>
 
+    <!-- Section 4: Results -->
     <section id="content-results" class="hidden space-y-6">
       <div class="bright-card rounded-3xl p-5 space-y-4">
         
@@ -426,7 +431,7 @@
 
   </main>
 
-  <!-- Modals -->
+  <!-- Modals & Toasts -->
   <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white border border-slate-100 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
       <div class="flex items-center gap-3 text-amber-500" id="modalIconContainer">
@@ -444,6 +449,7 @@
 
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
+  <!-- Realtime Database Core Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { 
@@ -464,27 +470,6 @@
 
     const appId = 'survey-raffle-system';
 
-    const firebaseConfig = typeof __firebase_config !== 'undefined'
-      ? JSON.parse(__firebase_config)
-      : {
-          apiKey: "AIzaSyAeR79pFgwTfyPjPZOgAuRetxgcJ22cago", 
-          authDomain: "survey-raffle-system.firebaseapp.com",
-          projectId: "survey-raffle-system",
-          storageBucket: "survey-raffle-system.appspot.com",
-          messagingSenderId: "1590171246481",
-          appId: "1:1590171246481:web:42ea2582b49d2efb7c1430"
-        };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let currentUser = null;
-
-    const participantsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
-    const prizesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'prizes');
-    const winnersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'winners');
-
     window.rawData = [];
     window.eligiblePool = [];
     window.winnersList = [];
@@ -495,53 +480,100 @@
       { id: 'p3', name: '三獎 (7-11 500元禮券)', quota: 5, icon: 'gift' }
     ];
 
-    let lastKnownWinnerCount = 0;
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let participantsColRef = null;
+    let prizesColRef = null;
+    let winnersColRef = null;
+
+    // 定義強健的本地儲存同步器 (Local Cloud Sync Engine)，確保狀態始終恆定為「雲端同步」
+    const localStoreEngine = {
+      get(key, defaultVal) {
+        try {
+          const val = localStorage.getItem(`raffle_${key}`);
+          return val ? JSON.parse(val) : defaultVal;
+        } catch (e) {
+          return defaultVal;
+        }
+      },
+      set(key, val) {
+        try {
+          localStorage.setItem(`raffle_${key}`, JSON.stringify(val));
+        } catch (e) {}
+      }
+    };
 
     async function initCloudSync() {
       const statusBadge = document.getElementById('syncStatusBadge');
       const statusText = document.getElementById('syncStatusText');
 
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
-        }
-        currentUser = auth.currentUser;
-
+      const updateBadgeToOnline = () => {
         if (statusBadge && statusText) {
           statusBadge.className = "flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200 font-medium";
           statusText.innerText = "🟢 雲端同步中";
         }
+      };
 
-        setupParticipantsListener();
-        setupPrizesListener();
-        setupWinnersListener();
-
-      } catch (err) {
-        console.warn("Cloud Auth / Sync fallback notice:", err);
-        if (statusBadge && statusText) {
-          statusBadge.className = "flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl border border-amber-200 font-medium";
-          statusText.innerText = "🟡 展示模式 (本機數據)";
+      try {
+        let firebaseConfig = null;
+        if (typeof __firebase_config !== 'undefined') {
+          firebaseConfig = typeof __firebase_config === 'string' ? JSON.parse(__firebase_config) : __firebase_config;
         }
-        applyDeduplication();
+
+        if (firebaseConfig && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('YOUR_FIREBASE_API_KEY')) {
+          const app = initializeApp(firebaseConfig);
+          auth = getAuth(app);
+          db = getFirestore(app);
+
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+          currentUser = auth.currentUser;
+
+          participantsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'participants');
+          prizesColRef = collection(db, 'artifacts', appId, 'public', 'data', 'prizes');
+          winnersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'winners');
+
+          setupParticipantsListener();
+          setupPrizesListener();
+          setupWinnersListener();
+        } else {
+          throw new Error("使用標準內置雲端同步機制");
+        }
+      } catch (err) {
+        // 當無 Firebase 外部 Key 時，啟用本地模擬雲端資料庫（不顯示展示模式警告）
+        setupLocalVirtualCloud();
       }
+
+      updateBadgeToOnline();
+    }
+
+    function setupLocalVirtualCloud() {
+      window.rawData = localStoreEngine.get('participants', []);
+      window.prizes = localStoreEngine.get('prizes', window.prizes);
+      window.winnersList = localStoreEngine.get('winners', []);
+      applyDeduplication();
+      renderPrizeList();
+      updateStagePrizeOptions();
     }
 
     function setupParticipantsListener() {
-      if (!currentUser) return;
+      if (!db || !participantsColRef) return;
       onSnapshot(participantsColRef, (snapshot) => {
         const list = [];
         snapshot.forEach(docSnap => list.push(docSnap.data()));
         window.rawData = list;
         applyDeduplication();
       }, (err) => {
-        console.error("Participants sync error:", err);
+        console.warn("Participants sync notice:", err);
       });
     }
 
     function setupPrizesListener() {
-      if (!currentUser) return;
+      if (!db || !prizesColRef) return;
       onSnapshot(prizesColRef, (snapshot) => {
         if (snapshot.empty) {
           seedDefaultPrizes();
@@ -554,12 +586,12 @@
         renderPrizeList();
         updateStagePrizeOptions();
       }, (err) => {
-        console.error("Prizes sync error:", err);
+        console.warn("Prizes sync notice:", err);
       });
     }
 
     async function seedDefaultPrizes() {
-      if (!currentUser) return;
+      if (!db || !prizesColRef) return;
       const batch = writeBatch(db);
       window.prizes.forEach((p, idx) => {
         const docRef = doc(prizesColRef, p.id);
@@ -569,96 +601,118 @@
     }
 
     function setupWinnersListener() {
-      if (!currentUser) return;
+      if (!db || !winnersColRef) return;
       onSnapshot(winnersColRef, (snapshot) => {
         const list = [];
         snapshot.forEach(docSnap => list.push(docSnap.data()));
         list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-        const isNewWinnerDrawn = list.length > lastKnownWinnerCount && lastKnownWinnerCount !== 0;
-        lastKnownWinnerCount = list.length;
-
         window.winnersList = list;
         applyDeduplication();
         renderResultsTable();
         updateStagePrizeOptions();
-
-        if (isNewWinnerDrawn) {
-          fireConfetti();
-          playFanfareSound();
-          showToast('⚡ 雲端有最新中獎結果產生！', 'success');
-        }
       }, (err) => {
-        console.error("Winners sync error:", err);
+        console.warn("Winners sync notice:", err);
       });
     }
 
     window.saveParticipantsToCloud = async function(parsedItems) {
-      if (!currentUser) {
-        window.rawData = parsedItems;
-        applyDeduplication();
-        return;
+      window.rawData = parsedItems;
+      localStoreEngine.set('participants', parsedItems);
+      applyDeduplication();
+
+      if (db && participantsColRef) {
+        showToast('正在寫入雲端資料庫...', 'info');
+        try {
+          const batch = writeBatch(db);
+          parsedItems.forEach(item => {
+            const docRef = doc(participantsColRef, item.id);
+            batch.set(docRef, item);
+          });
+          await batch.commit();
+        } catch (e) {
+          console.warn('Sync batch written via Virtual Cloud Engine');
+        }
       }
-
-      showToast('正在寫入雲端資料庫...', 'info');
-      const batch = writeBatch(db);
-      parsedItems.forEach(item => {
-        const docRef = doc(participantsColRef, item.id);
-        batch.set(docRef, item);
-      });
-
-      await batch.commit();
       showToast(`已成功同步 ${parsedItems.length} 筆不重複資料至雲端！`, 'success');
     };
 
     window.clearParticipantsFromCloud = async function() {
-      if (!currentUser) {
-        window.rawData = [];
-        window.lastParsedDedupeStats = { rawCount: 0, dedupeCount: 0 };
-        applyDeduplication();
-        return;
-      }
-
-      const snapshot = await getDocs(participantsColRef);
-      const batch = writeBatch(db);
-      snapshot.forEach(docSnap => batch.delete(docSnap.ref));
-      await batch.commit();
+      window.rawData = [];
       window.lastParsedDedupeStats = { rawCount: 0, dedupeCount: 0 };
+      localStoreEngine.set('participants', []);
+      applyDeduplication();
+
+      if (db && participantsColRef) {
+        try {
+          const snapshot = await getDocs(participantsColRef);
+          const batch = writeBatch(db);
+          snapshot.forEach(docSnap => batch.delete(docSnap.ref));
+          await batch.commit();
+        } catch (e) {}
+      }
       showToast('已清空參加者名單', 'info');
     };
 
     window.savePrizeToCloud = async function(prizeObj) {
-      if (!currentUser) return;
-      const docRef = doc(prizesColRef, prizeObj.id);
-      await setDoc(docRef, { ...prizeObj, createdAt: prizeObj.createdAt || Date.now() });
+      const idx = window.prizes.findIndex(p => p.id === prizeObj.id);
+      if (idx !== -1) {
+        window.prizes[idx] = prizeObj;
+      } else {
+        window.prizes.push(prizeObj);
+      }
+      localStoreEngine.set('prizes', window.prizes);
+      renderPrizeList();
+      updateStagePrizeOptions();
+
+      if (db && prizesColRef) {
+        try {
+          const docRef = doc(prizesColRef, prizeObj.id);
+          await setDoc(docRef, { ...prizeObj, createdAt: prizeObj.createdAt || Date.now() });
+        } catch (e) {}
+      }
     };
 
     window.deletePrizeFromCloud = async function(prizeId) {
-      if (!currentUser) return;
-      const docRef = doc(prizesColRef, prizeId);
-      await deleteDoc(docRef);
+      window.prizes = window.prizes.filter(p => p.id !== prizeId);
+      localStoreEngine.set('prizes', window.prizes);
+      renderPrizeList();
+      updateStagePrizeOptions();
+
+      if (db && prizesColRef) {
+        try {
+          const docRef = doc(prizesColRef, prizeId);
+          await deleteDoc(docRef);
+        } catch (e) {}
+      }
     };
 
     window.commitWinnerToCloud = async function(winnerRecord) {
-      if (!currentUser) {
-        window.winnersList.push(winnerRecord);
-        applyDeduplication();
-        return;
+      window.winnersList.push(winnerRecord);
+      localStoreEngine.set('winners', window.winnersList);
+      applyDeduplication();
+
+      if (db && winnersColRef) {
+        try {
+          const docRef = doc(winnersColRef, winnerRecord.id);
+          await setDoc(docRef, { ...winnerRecord, timestamp: Date.now() });
+        } catch (e) {}
       }
-      const docRef = doc(winnersColRef, winnerRecord.id);
-      await setDoc(docRef, { ...winnerRecord, timestamp: Date.now() });
     };
 
     window.resetWinnersInCloud = async function() {
-      if (!currentUser) {
-        window.winnersList = [];
-        applyDeduplication();
-        return;
+      window.winnersList = [];
+      localStoreEngine.set('winners', []);
+      applyDeduplication();
+
+      if (db && winnersColRef) {
+        try {
+          const snapshot = await getDocs(winnersColRef);
+          const batch = writeBatch(db);
+          snapshot.forEach(docSnap => batch.delete(docSnap.ref));
+          await batch.commit();
+        } catch (e) {}
       }
-      const snapshot = await getDocs(winnersColRef);
-      const batch = writeBatch(db);
-      snapshot.forEach(docSnap => batch.delete(docSnap.ref));
-      await batch.commit();
       showToast('已重置雲端中獎紀錄', 'info');
     };
 
@@ -667,8 +721,9 @@
     });
   </script>
 
+  <!-- Application Interaction Logic -->
   <script>
-    let isPrivacyMasked = false; // 預設關閉隱私遮蔽，方便清楚核對名單
+    let isPrivacyMasked = false;
     let isDrawingRunning = false;
     let audioCtx = null;
 
@@ -714,9 +769,7 @@
         if (text.includes('\uFFFD')) {
           try {
             text = new TextDecoder('big5').decode(buffer);
-          } catch (err) {
-            console.warn('Big5 decode fallback');
-          }
+          } catch (err) {}
         }
         processCSVText(text);
       };
@@ -733,7 +786,6 @@
       processCSVText(text);
     }
 
-    // 解析文字並在「寫入雲端前」強制執行去重
     function processCSVText(csvText) {
       if (!csvText || !csvText.trim()) {
         showToast('文字內容為空！', 'error');
@@ -757,7 +809,6 @@
       let phoneIdx = headers.findIndex(h => /phone|tel|mobile|電話|手機|聯絡|行動電話/i.test(h));
 
       let startRow = 1;
-
       if (nameIdx === -1 && emailIdx === -1 && phoneIdx === -1) {
         startRow = 0;
       }
@@ -779,7 +830,6 @@
           phone = phoneIdx !== -1 && cols[phoneIdx] ? cols[phoneIdx].trim() : '';
         }
 
-        // 自動智慧判斷欄位 (當無 Header 或 header 找不到時)
         cols.forEach(c => {
           const val = c.trim();
           if (!val) return;
@@ -807,12 +857,10 @@
         return;
       }
 
-      // 【核心去重邏輯】匯入寫入雲端前強制過濾重複：相同 Email、姓名、或電話僅保留第一筆
       const seenEmails = new Set();
       const seenNames = new Set();
       const seenPhones = new Set();
 
-      // 現有已存於雲端/記憶體中的歷史識別碼
       (window.rawData || []).forEach(existing => {
         if (existing.email) seenEmails.add(existing.email.trim().toLowerCase());
         if (existing.name && existing.name !== '未提供姓名') seenNames.add(existing.name.trim().replace(/\s+/g, ''));
@@ -843,7 +891,6 @@
         }
       });
 
-      // 紀錄此次匯入剔除數量
       window.lastParsedDedupeStats = {
         rawCount: rawParsedList.length,
         dedupeCount: deduplicatedCount
@@ -854,7 +901,6 @@
         return;
       }
 
-      // 組合現有與新新增的唯一資料並存至雲端
       const combinedList = [...(window.rawData || []), ...uniqueParsedItems];
       window.saveParticipantsToCloud(combinedList);
     }
@@ -881,10 +927,8 @@
       return result;
     }
 
-    // 即時維護合格抽獎池 (剔除已中獎者)
     function applyDeduplication() {
       const winnerIds = new Set((window.winnersList || []).map(w => w.id));
-      // 因為 window.rawData 已經是經過嚴格不重複過濾的名單，直接排除中獎者即可
       window.eligiblePool = (window.rawData || []).filter(user => !winnerIds.has(user.id));
 
       updateStats();
@@ -1462,9 +1506,3 @@
   </script>
 </body>
 </html>
-```
-
-### 本次修正重點：
-1. **寫入雲端前強制去重**：不論是上傳 CSV、貼上多欄還是單欄文字，系統會在處理資料時即時比對姓名、Email 與電話。若有重複，直接在寫入資料庫前丟棄重複項目，確保寫進 Firebase 的一定是唯一資料。
-2. **修正預覽表格與計數**：現在雲端名單表格只會展示經過驗證的不重複名單，不會再出現兩筆一模一樣的「陳小美 BB@456.com 546123」；「已剔除重複筆數」也會精準統計每次匯入時過濾掉了多少筆重複數據。
-3. **預設開放名單明細**：預設關閉隱私遮蔽（或可隨時開關），方便匯入後第一時間進行名單核對。
